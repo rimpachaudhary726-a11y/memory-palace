@@ -39,5 +39,28 @@
     },
     "snippet": "last day of school",
     "date": "2026-07-06 19:11"
+  },
+  {
+    "index": 2,
+    "emotion": "nostalgia",
+    "objects": [
+      "school",
+      "classroom",
+      "desk",
+      "lockers"
+    ],
+    "spatial": "crowded",
+    "color": "#AB47BC",
+    "accent": "#7B1FA2",
+    "geometry": "cylinder",
+    "scale": 0.7,
+    "height": 2.05,
+    "position": {
+      "x": 0.48,
+      "y": 1.02,
+      "z": -5.52
+    },
+    "snippet": "my last day of school",
+    "date": "2026-07-06 19:44"
   }
 ]
