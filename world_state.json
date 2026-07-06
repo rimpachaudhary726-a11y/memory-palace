@@ -107,5 +107,27 @@
     },
     "snippet": "last day of college",
     "date": "2026-07-06 20:08"
+  },
+  {
+    "index": 5,
+    "emotion": "nostalgia",
+    "objects": [
+      "school",
+      "classroom",
+      "hallway"
+    ],
+    "spatial": "crowded",
+    "color": "#AB47BC",
+    "accent": "#7B1FA2",
+    "geometry": "cylinder",
+    "scale": 0.7,
+    "height": 8.99,
+    "position": {
+      "x": 6.61,
+      "y": 4.49,
+      "z": -4.21
+    },
+    "snippet": "last day of school",
+    "date": "2026-07-06 20:17"
   }
 ]
