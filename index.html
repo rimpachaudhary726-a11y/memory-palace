@@ -560,7 +560,10 @@ const beamTexture = (() => {
     ctx.fillRect(x, 0, 1, 320);
   }
   ctx.globalCompositeOperation = 'source-over';
-  return new THREE.CanvasTexture(c);
+  const tex = new THREE.CanvasTexture(c);
+  tex.wrapS = THREE.RepeatWrapping;
+  tex.wrapT = THREE.RepeatWrapping;
+  return tex;
 })();
 
 // Vertical "data stream" texture for the sides of a tower - a handful of
@@ -595,29 +598,38 @@ const energyTexture = (() => {
 })();
 
 // Every mesh/material pair registered here gets its texture offset nudged
-// upward each animation frame - this is what actually drives the
-// "moving from down to up" motion on the building sides.
+// each animation frame - {mat, speed}, where speed's sign decides
+// direction. Two layers per building (one positive, one negative speed)
+// is what produces the "up AND down at once" flowing look.
 const scrollingEnergyMaterials = [];
 
 // Thin glowing vertical streak lines wrapped around a tower's sides,
 // slightly outside the facade radius/width so they read as an energy
-// skin climbing the building rather than clipping into the windows.
+// skin climbing (and descending) the building rather than clipping into
+// the windows. Two counter-scrolling layers, one nudged just outside the
+// other, give a genuine two-way current instead of one flat direction.
 function addEnergyLines(parent, key, footprint, h, accentColor) {
-  const tex = energyTexture.clone();
-  tex.needsUpdate = true;
-  tex.repeat.set(key === 'cylinder' ? 3 : 4, Math.max(1, h / 10));
-  const mat = new THREE.MeshBasicMaterial({
-    map: tex, color: new THREE.Color(accentColor),
-    transparent: true, opacity: 0.85, depthWrite: false,
-    blending: THREE.AdditiveBlending, side: THREE.DoubleSide,
-  });
-  const geo = key === 'cylinder'
-    ? new THREE.CylinderGeometry(footprint * 0.505, footprint * 0.505, h * 0.98, 20, 1, true)
-    : new THREE.BoxGeometry(footprint * 1.012, h * 0.98, footprint * 1.012);
-  const mesh = new THREE.Mesh(geo, mat);
-  parent.add(mesh);
-  scrollingEnergyMaterials.push(mat);
-  return mesh;
+  function makeLayer(speed, radiusScale, tintColor, opacity) {
+    const tex = energyTexture.clone();
+    tex.needsUpdate = true;
+    tex.repeat.set(key === 'cylinder' ? 3 : 4, Math.max(1, h / 10));
+    const mat = new THREE.MeshBasicMaterial({
+      map: tex, color: new THREE.Color(tintColor),
+      transparent: true, opacity, depthWrite: false,
+      blending: THREE.AdditiveBlending, side: THREE.DoubleSide,
+    });
+    const geo = key === 'cylinder'
+      ? new THREE.CylinderGeometry(footprint * 0.505 * radiusScale, footprint * 0.505 * radiusScale, h * 0.98, 20, 1, true)
+      : new THREE.BoxGeometry(footprint * 1.012 * radiusScale, h * 0.98, footprint * 1.012 * radiusScale);
+    const mesh = new THREE.Mesh(geo, mat);
+    parent.add(mesh);
+    scrollingEnergyMaterials.push({ mat, speed });
+  }
+  // Accent-colored streaks climbing up, plus a slightly larger, dimmer
+  // white layer descending - reads as two independent currents rather
+  // than one texture just reversing on itself.
+  makeLayer(-0.012, 1.0, accentColor, 0.85);
+  makeLayer(0.012, 1.015, 0xffffff, 0.5);
 }
 
 // The glowing orb/gem sitting on the rooftop, right where the searchlight
@@ -990,12 +1002,18 @@ function animate() {
     posAttr.needsUpdate = true;
   }
 
-  // Scroll every building's side energy-lines texture so the streaks
-  // themselves appear to travel up the facade (subtracting from offset.y
-  // moves the pattern upward across the surface).
+  // Rooftop searchlight beams pulse up and down (not one flat direction) -
+  // a sine wave drives the texture offset back and forth, so brightness
+  // visibly travels up the shaft then back down, on every beam at once
+  // since they all share this one texture.
+  beamTexture.offset.y = Math.sin(performance.now() * 0.0016) * 0.4;
+
+  // Scroll every building's side energy-lines texture in its own stored
+  // direction - negative speeds climb upward, positive speeds descend, so
+  // both currents run at once on every tower.
   for (let i = 0; i < scrollingEnergyMaterials.length; i++) {
-    const mat = scrollingEnergyMaterials[i];
-    mat.map.offset.y -= 0.012;
+    const entry = scrollingEnergyMaterials[i];
+    entry.mat.map.offset.y += entry.speed;
   }
 
   // Gentle continuous spin on each rooftop orb/gem, core and wireframe
