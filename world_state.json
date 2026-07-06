@@ -65,22 +65,25 @@
   },
   {
     "index": 3,
-    "emotion": "neutral",
+    "emotion": "nostalgia",
     "objects": [
-      "place"
+      "school",
+      "classroom",
+      "lockers",
+      "desk"
     ],
-    "spatial": "neutral",
-    "color": "#B0BEC5",
-    "accent": "#78909C",
-    "geometry": "box",
-    "scale": 1.0,
-    "height": 2.62,
+    "spatial": "crowded",
+    "color": "#AB47BC",
+    "accent": "#7B1FA2",
+    "geometry": "cylinder",
+    "scale": 0.7,
+    "height": 2.69,
     "position": {
       "x": 3.89,
-      "y": 1.31,
+      "y": 1.35,
       "z": 5.08
     },
-    "snippet": "a",
+    "snippet": "last day of school",
     "date": "2026-07-06 19:55"
   }
 ]
