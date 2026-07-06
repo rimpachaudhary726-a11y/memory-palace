@@ -150,5 +150,27 @@
     },
     "snippet": "last day of year",
     "date": "2026-07-06 20:30"
+  },
+  {
+    "index": 7,
+    "emotion": "neutral",
+    "objects": [
+      "calendar",
+      "date",
+      "month"
+    ],
+    "spatial": "neutral",
+    "color": "#B0BEC5",
+    "accent": "#4DD0E1",
+    "geometry": "box",
+    "scale": 1.0,
+    "height": 10.27,
+    "position": {
+      "x": -4.17,
+      "y": 5.13,
+      "z": -8.03
+    },
+    "snippet": "last day of month",
+    "date": "2026-07-06 20:40"
   }
 ]
