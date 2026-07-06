@@ -16,15 +16,32 @@
     position:fixed; top:14px; left:50%; transform:translateX(-50%);
     color:#888; font-size:12px; letter-spacing:0.5px;
   }
+  #status {
+    position:fixed; top:50%; left:50%; transform:translate(-50%,-50%);
+    color:#eee; font-size:14px; text-align:center; max-width:85%;
+    background:rgba(20,20,30,0.9); padding:16px 20px; border-radius:10px;
+    border:1px solid rgba(255,255,255,0.15); white-space:pre-wrap;
+  }
+  #status.error { color:#ff6b6b; border-color:#ff6b6b; }
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/examples/js/controls/OrbitControls.js"></script>
 </head>
 <body>
 <div id="hint">drag to orbit - scroll to zoom - tap a building to recall its memory</div>
+<div id="status">loading Three.js...</div>
 <div id="label"></div>
 <script>
-const BUILDINGS = [{"index": 0, "emotion": "joy", "objects": [], "spatial": "neutral", "color": "#FFEB3B", "accent": "#FF9800", "geometry": "box", "scale": 1.0, "height": 2.5, "position": {"x": 3.2, "y": 1.25, "z": 0.0}, "snippet": "I remember my first day of school. I was nervous but excited.", "date": "2026-07-06 19:02"}];
+window.addEventListener('error', function(e) {
+  const el = document.getElementById('status');
+  el.className = 'error';
+  el.style.display = 'block';
+  el.textContent = 'ERROR: ' + (e.message || 'unknown script error') +
+    (e.filename ? '\n(' + e.filename.split('/').pop() + ':' + e.lineno + ')' : '');
+});
+
+try {
+const BUILDINGS = [{"index": 0, "emotion": "joy", "objects": [], "spatial": "neutral", "color": "#FFEB3B", "accent": "#FF9800", "geometry": "box", "scale": 1.0, "height": 2.5, "position": {"x": 3.2, "y": 1.25, "z": 0.0}, "snippet": "I remember my first day of school. I was nervous but excited.", "date": "2026-07-06 19:02"}, {"index": 1, "emotion": "nostalgia", "objects": ["school", "classroom", "hallway", "backpack"], "spatial": "open", "color": "#AB47BC", "accent": "#7B1FA2", "geometry": "cylinder", "scale": 1.4, "height": 3.1, "position": {"x": -3.34, "y": 1.55, "z": 3.06}, "snippet": "last day of school", "date": "2026-07-06 19:11"}];
 
 const scene = new THREE.Scene();
 scene.fog = new THREE.FogExp2(0x05050a, 0.015);
@@ -117,10 +134,16 @@ renderer.domElement.addEventListener('touchend', (e) => {
   }
 });
 
+let firstFrameRendered = false;
 function animate() {
   requestAnimationFrame(animate);
   controls.update();
   renderer.render(scene, camera);
+  if (!firstFrameRendered) {
+    firstFrameRendered = true;
+    const el = document.getElementById('status');
+    if (el) el.style.display = 'none';
+  }
 }
 animate();
 
@@ -129,6 +152,13 @@ window.addEventListener('resize', () => {
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
 });
+
+} catch (err) {
+  const el = document.getElementById('status');
+  el.className = 'error';
+  el.style.display = 'block';
+  el.textContent = 'BUILD ERROR: ' + (err && err.message ? err.message : err);
+}
 </script>
 </body>
 </html>
