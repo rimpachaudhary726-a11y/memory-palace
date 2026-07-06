@@ -40,7 +40,7 @@ window.addEventListener('error', function(e) {
 });
 
 try {
-const BUILDINGS = [{"index": 0, "emotion": "joy", "objects": [], "spatial": "neutral", "color": "#FFEB3B", "accent": "#FF9800", "geometry": "box", "scale": 1.0, "height": 2.5, "position": {"x": 3.2, "y": 1.25, "z": 0.0}, "snippet": "I remember my first day of school. I was nervous but excited.", "date": "2026-07-06 19:02"}, {"index": 1, "emotion": "nostalgia", "objects": ["school", "classroom", "hallway", "backpack"], "spatial": "open", "color": "#AB47BC", "accent": "#7B1FA2", "geometry": "cylinder", "scale": 1.4, "height": 3.1, "position": {"x": -3.34, "y": 1.55, "z": 3.06}, "snippet": "last day of school", "date": "2026-07-06 19:11"}, {"index": 2, "emotion": "nostalgia", "objects": ["school", "classroom", "desk", "lockers"], "spatial": "crowded", "color": "#AB47BC", "accent": "#7B1FA2", "geometry": "cylinder", "scale": 0.7, "height": 2.05, "position": {"x": 0.48, "y": 1.02, "z": -5.52}, "snippet": "my last day of school", "date": "2026-07-06 19:44"}, {"index": 3, "emotion": "nostalgia", "objects": ["school", "classroom", "lockers", "desk"], "spatial": "crowded", "color": "#AB47BC", "accent": "#7B1FA2", "geometry": "cylinder", "scale": 0.7, "height": 2.69, "position": {"x": 3.89, "y": 1.35, "z": 5.08}, "snippet": "last day of school", "date": "2026-07-06 19:55"}];
+const BUILDINGS = [{"index": 0, "emotion": "joy", "objects": [], "spatial": "neutral", "color": "#FFEB3B", "accent": "#FF9800", "geometry": "box", "scale": 1.0, "height": 2.5, "position": {"x": 3.2, "y": 1.25, "z": 0.0}, "snippet": "I remember my first day of school. I was nervous but excited.", "date": "2026-07-06 19:02"}, {"index": 1, "emotion": "nostalgia", "objects": ["school", "classroom", "hallway", "backpack"], "spatial": "open", "color": "#AB47BC", "accent": "#7B1FA2", "geometry": "cylinder", "scale": 1.4, "height": 3.1, "position": {"x": -3.34, "y": 1.55, "z": 3.06}, "snippet": "last day of school", "date": "2026-07-06 19:11"}, {"index": 2, "emotion": "nostalgia", "objects": ["school", "classroom", "desk", "lockers"], "spatial": "crowded", "color": "#AB47BC", "accent": "#7B1FA2", "geometry": "cylinder", "scale": 0.7, "height": 2.05, "position": {"x": 0.48, "y": 1.02, "z": -5.52}, "snippet": "my last day of school", "date": "2026-07-06 19:44"}, {"index": 3, "emotion": "nostalgia", "objects": ["school", "classroom", "lockers", "desk"], "spatial": "crowded", "color": "#AB47BC", "accent": "#7B1FA2", "geometry": "cylinder", "scale": 0.7, "height": 2.69, "position": {"x": 3.89, "y": 1.35, "z": 5.08}, "snippet": "last day of school", "date": "2026-07-06 19:55"}, {"index": 4, "emotion": "nostalgia", "objects": ["college", "dorm", "lecture hall"], "spatial": "crowded", "color": "#AB47BC", "accent": "#7B1FA2", "geometry": "box", "scale": 0.7, "height": 7.23, "position": {"x": -7.05, "y": 3.61, "z": -1.25}, "snippet": "last day of college", "date": "2026-07-06 20:08"}];
 
 const scene = new THREE.Scene();
 scene.fog = new THREE.FogExp2(0x05050a, 0.015);
@@ -49,7 +49,27 @@ const camera = new THREE.PerspectiveCamera(60, window.innerWidth/window.innerHei
 
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 document.body.appendChild(renderer.domElement);
+
+// Gradient sky dome - replaces the flat void behind the stars with a soft
+// navy-to-black backdrop, same trick GitCity-style scenes use for atmosphere.
+{
+  const skyCanvas = document.createElement('canvas');
+  skyCanvas.width = 2; skyCanvas.height = 256;
+  const ctx = skyCanvas.getContext('2d');
+  const grad = ctx.createLinearGradient(0, 0, 0, 256);
+  grad.addColorStop(0, '#0a0a1a');
+  grad.addColorStop(0.5, '#0d0d20');
+  grad.addColorStop(1, '#05050a');
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, 2, 256);
+  const skyTex = new THREE.CanvasTexture(skyCanvas);
+  const skyGeo = new THREE.SphereGeometry(900, 16, 16);
+  const skyMat = new THREE.MeshBasicMaterial({ map: skyTex, side: THREE.BackSide, fog: false });
+  scene.add(new THREE.Mesh(skyGeo, skyMat));
+}
 
 // Small built-in orbit camera (no OrbitControls.js dependency - that file
 // isn't reliably available from CDNs for a plain script tag anymore, so
@@ -82,9 +102,21 @@ function flyToBuilding(b) {
 }
 updateCamera();
 
-scene.add(new THREE.AmbientLight(0x404050, 1.1));
-const sun = new THREE.DirectionalLight(0xffffff, 0.9);
-sun.position.set(20, 40, 10);
+scene.add(new THREE.AmbientLight(0x404050, 0.7));
+scene.add(new THREE.HemisphereLight(0x8891ff, 0x0a0a10, 0.55));
+
+const sun = new THREE.DirectionalLight(0xffd9a8, 1.0);
+sun.position.set(30, 55, 20);
+sun.castShadow = true;
+sun.shadow.mapSize.width = 2048;
+sun.shadow.mapSize.height = 2048;
+sun.shadow.camera.near = 1;
+sun.shadow.camera.far = 250;
+sun.shadow.camera.left = -120;
+sun.shadow.camera.right = 120;
+sun.shadow.camera.top = 120;
+sun.shadow.camera.bottom = -120;
+sun.shadow.bias = -0.0015;
 scene.add(sun);
 
 // Starfield - small white points scattered on a big sphere, purely
@@ -106,13 +138,35 @@ scene.add(sun);
   scene.add(new THREE.Points(starGeo, starMat));
 }
 
-// Ground
-const ground = new THREE.Mesh(
-  new THREE.CircleGeometry(200, 64),
-  new THREE.MeshStandardMaterial({ color: 0x0d0d16, roughness: 1 })
-);
-ground.rotation.x = -Math.PI / 2;
-scene.add(ground);
+// Ground - subtle radial gradient + faint grid, instead of one flat color,
+// so the plaza reads as a lit surface rather than a dark cutout.
+{
+  const size = 512;
+  const gCanvas = document.createElement('canvas');
+  gCanvas.width = size; gCanvas.height = size;
+  const gctx = gCanvas.getContext('2d');
+  const radial = gctx.createRadialGradient(size/2, size/2, 0, size/2, size/2, size/2);
+  radial.addColorStop(0, '#181826');
+  radial.addColorStop(0.6, '#101018');
+  radial.addColorStop(1, '#08080d');
+  gctx.fillStyle = radial;
+  gctx.fillRect(0, 0, size, size);
+  gctx.strokeStyle = 'rgba(255,255,255,0.04)';
+  gctx.lineWidth = 1;
+  const step = size / 24;
+  for (let i = 0; i <= 24; i++) {
+    gctx.beginPath(); gctx.moveTo(i*step, 0); gctx.lineTo(i*step, size); gctx.stroke();
+    gctx.beginPath(); gctx.moveTo(0, i*step); gctx.lineTo(size, i*step); gctx.stroke();
+  }
+  const groundTex = new THREE.CanvasTexture(gCanvas);
+  const ground = new THREE.Mesh(
+    new THREE.CircleGeometry(200, 64),
+    new THREE.MeshStandardMaterial({ map: groundTex, color: 0xffffff, roughness: 0.95, metalness: 0.05 })
+  );
+  ground.rotation.x = -Math.PI / 2;
+  ground.receiveShadow = true;
+  scene.add(ground);
+}
 
 function makeGeometry(key, s, h) {
   switch (key) {
@@ -152,6 +206,69 @@ function addWindows(mesh, key, s, h) {
 }
 
 
+// Roof cap + base plinth - the detail that makes a shape read as an actual
+// building rather than a colored primitive floating in space, same visual
+// language as Git City's rooftop/foundation silhouettes.
+function addRoofAndPlinth(parent, key, s, h, accentColor) {
+  if (key === 'box' || key === 'cylinder') {
+    const capGeo = key === 'box'
+      ? new THREE.BoxGeometry(1.4 * s * 1.08, 0.18, 1.4 * s * 1.08)
+      : new THREE.CylinderGeometry(0.7 * s * 1.1, 0.7 * s * 1.1, 0.18, 16);
+    const capMat = new THREE.MeshStandardMaterial({
+      color: new THREE.Color(accentColor), emissive: new THREE.Color(accentColor),
+      emissiveIntensity: 0.5, roughness: 0.4, metalness: 0.5,
+    });
+    const cap = new THREE.Mesh(capGeo, capMat);
+    cap.position.y = h / 2 + 0.09;
+    cap.castShadow = true;
+    parent.add(cap);
+
+    if (Math.random() > 0.5) {
+      const antenna = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.02, 0.02, 0.6 * s + 0.4, 6),
+        new THREE.MeshStandardMaterial({ color: 0x888899, emissive: 0xff4444, emissiveIntensity: 0.3 })
+      );
+      antenna.position.y = h / 2 + 0.5 * s + 0.3;
+      parent.add(antenna);
+    }
+  }
+
+  const plinthGeo = new THREE.CylinderGeometry(0.95 * s + 0.25, 1.05 * s + 0.3, 0.22, 20);
+  const plinthMat = new THREE.MeshStandardMaterial({ color: 0x14141c, roughness: 0.9 });
+  const plinth = new THREE.Mesh(plinthGeo, plinthMat);
+  plinth.position.y = -h / 2 - 0.1;
+  plinth.receiveShadow = true;
+  plinth.castShadow = true;
+  parent.add(plinth);
+}
+
+// Soft additive glow sprite - cheap stand-in for real bloom postprocessing
+// (which would need extra CDN files we're deliberately avoiding). Sits
+// behind each building's point light and fakes a light-bleed halo.
+const glowTexture = (() => {
+  const c = document.createElement('canvas');
+  c.width = 128; c.height = 128;
+  const ctx = c.getContext('2d');
+  const g = ctx.createRadialGradient(64, 64, 0, 64, 64, 64);
+  g.addColorStop(0, 'rgba(255,255,255,0.9)');
+  g.addColorStop(0.4, 'rgba(255,255,255,0.25)');
+  g.addColorStop(1, 'rgba(255,255,255,0)');
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, 128, 128);
+  return new THREE.CanvasTexture(c);
+})();
+
+function addGlowSprite(position, color, scale) {
+  const mat = new THREE.SpriteMaterial({
+    map: glowTexture, color: new THREE.Color(color),
+    transparent: true, opacity: 0.55, depthWrite: false, blending: THREE.AdditiveBlending,
+  });
+  const sprite = new THREE.Sprite(mat);
+  sprite.position.copy(position);
+  sprite.scale.set(scale, scale, 1);
+  scene.add(sprite);
+}
+
 const clickable = [];
 const raycaster = new THREE.Raycaster();
 const labelEl = document.getElementById('label');
@@ -175,7 +292,10 @@ BUILDINGS.forEach(b => {
   const mesh = new THREE.Mesh(geo, mat);
   mesh.position.set(b.position.x, b.position.y, b.position.z);
   mesh.userData = b;
+  mesh.castShadow = true;
+  mesh.receiveShadow = true;
   addWindows(mesh, b.geometry, b.scale, h);
+  addRoofAndPlinth(mesh, b.geometry, b.scale, h, b.accent);
   scene.add(mesh);
   clickable.push(mesh);
 
@@ -183,6 +303,7 @@ BUILDINGS.forEach(b => {
   const glow = new THREE.PointLight(new THREE.Color(b.accent), 0.6, 6);
   glow.position.set(b.position.x, b.position.y + 1.5, b.position.z);
   scene.add(glow);
+  addGlowSprite(glow.position, b.accent, Math.max(2.2, h * 0.9));
 });
 
 function showLabel(b) {
