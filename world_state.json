@@ -1,0 +1,20 @@
+[
+  {
+    "index": 0,
+    "emotion": "joy",
+    "objects": [],
+    "spatial": "neutral",
+    "color": "#FFEB3B",
+    "accent": "#FF9800",
+    "geometry": "box",
+    "scale": 1.0,
+    "height": 2.5,
+    "position": {
+      "x": 3.2,
+      "y": 1.25,
+      "z": 0.0
+    },
+    "snippet": "I remember my first day of school. I was nervous but excited.",
+    "date": "2026-07-06 19:02"
+  }
+]
