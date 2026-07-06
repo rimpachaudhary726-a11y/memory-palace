@@ -40,7 +40,7 @@ window.addEventListener('error', function(e) {
 });
 
 try {
-const BUILDINGS = [{"index": 0, "emotion": "joy", "objects": [], "spatial": "neutral", "color": "#FFEB3B", "accent": "#FF9800", "geometry": "box", "scale": 1.0, "height": 2.5, "position": {"x": 3.2, "y": 1.25, "z": 0.0}, "snippet": "I remember my first day of school. I was nervous but excited.", "date": "2026-07-06 19:02"}, {"index": 1, "emotion": "nostalgia", "objects": ["school", "classroom", "hallway", "backpack"], "spatial": "open", "color": "#AB47BC", "accent": "#7B1FA2", "geometry": "cylinder", "scale": 1.4, "height": 3.1, "position": {"x": -3.34, "y": 1.55, "z": 3.06}, "snippet": "last day of school", "date": "2026-07-06 19:11"}, {"index": 2, "emotion": "nostalgia", "objects": ["school", "classroom", "desk", "lockers"], "spatial": "crowded", "color": "#AB47BC", "accent": "#7B1FA2", "geometry": "cylinder", "scale": 0.7, "height": 2.05, "position": {"x": 0.48, "y": 1.02, "z": -5.52}, "snippet": "my last day of school", "date": "2026-07-06 19:44"}, {"index": 3, "emotion": "nostalgia", "objects": ["school", "classroom", "lockers", "desk"], "spatial": "crowded", "color": "#AB47BC", "accent": "#7B1FA2", "geometry": "cylinder", "scale": 0.7, "height": 2.69, "position": {"x": 3.89, "y": 1.35, "z": 5.08}, "snippet": "last day of school", "date": "2026-07-06 19:55"}, {"index": 4, "emotion": "nostalgia", "objects": ["college", "dorm", "lecture hall"], "spatial": "crowded", "color": "#AB47BC", "accent": "#7B1FA2", "geometry": "box", "scale": 0.7, "height": 7.23, "position": {"x": -7.05, "y": 3.61, "z": -1.25}, "snippet": "last day of college", "date": "2026-07-06 20:08"}, {"index": 5, "emotion": "nostalgia", "objects": ["school", "classroom", "hallway"], "spatial": "crowded", "color": "#AB47BC", "accent": "#7B1FA2", "geometry": "cylinder", "scale": 0.7, "height": 8.99, "position": {"x": 6.61, "y": 4.49, "z": -4.21}, "snippet": "last day of school", "date": "2026-07-06 20:17"}, {"index": 6, "emotion": "nostalgia", "objects": ["calendar", "clock"], "spatial": "neutral", "color": "#AB47BC", "accent": "#F06292", "geometry": "box", "scale": 1.0, "height": 10.18, "position": {"x": -2.2, "y": 5.09, "z": 8.18}, "snippet": "last day of year", "date": "2026-07-06 20:30"}, {"index": 7, "emotion": "neutral", "objects": ["calendar", "date", "month"], "spatial": "neutral", "color": "#B0BEC5", "accent": "#4DD0E1", "geometry": "box", "scale": 1.0, "height": 10.27, "position": {"x": -4.17, "y": 5.13, "z": -8.03}, "snippet": "last day of month", "date": "2026-07-06 20:40"}, {"index": 8, "emotion": "fear", "objects": ["college", "campus", "classroom"], "spatial": "crowded", "color": "#37474F", "accent": "#00E676", "geometry": "box", "scale": 0.7, "height": 42.42, "position": {"x": 9.02, "y": 21.21, "z": 3.29}, "snippet": "my 1st day in college and I am so nervous", "date": "2026-07-06 20:54"}, {"index": 9, "emotion": "joy", "objects": ["clock", "fireworks", "people"], "spatial": "crowded", "color": "#FFEB3B", "accent": "#FF6D00", "geometry": "box", "scale": 0.7, "height": 36.4, "position": {"x": -9.35, "y": 18.2, "z": 3.86}, "snippet": "the new year", "date": "2026-07-06 21:10"}];
+const BUILDINGS = [{"index": 0, "emotion": "joy", "objects": [], "spatial": "neutral", "color": "#FFEB3B", "accent": "#FF9800", "geometry": "box", "scale": 1.0, "height": 2.5, "position": {"x": 7.5, "y": 1.25, "z": 0.0}, "snippet": "I remember my first day of school. I was nervous but excited.", "date": "2026-07-06 19:02"}, {"index": 1, "emotion": "nostalgia", "objects": ["school", "classroom", "hallway", "backpack"], "spatial": "open", "color": "#AB47BC", "accent": "#7B1FA2", "geometry": "cylinder", "scale": 1.4, "height": 3.1, "position": {"x": -7.82, "y": 1.55, "z": 7.16}, "snippet": "last day of school", "date": "2026-07-06 19:11"}, {"index": 2, "emotion": "nostalgia", "objects": ["school", "classroom", "desk", "lockers"], "spatial": "crowded", "color": "#AB47BC", "accent": "#7B1FA2", "geometry": "cylinder", "scale": 0.7, "height": 2.05, "position": {"x": 1.14, "y": 1.02, "z": -12.94}, "snippet": "my last day of school", "date": "2026-07-06 19:44"}, {"index": 3, "emotion": "nostalgia", "objects": ["school", "classroom", "lockers", "desk"], "spatial": "crowded", "color": "#AB47BC", "accent": "#7B1FA2", "geometry": "cylinder", "scale": 0.7, "height": 2.69, "position": {"x": 9.13, "y": 1.35, "z": 11.9}, "snippet": "last day of school", "date": "2026-07-06 19:55"}, {"index": 4, "emotion": "nostalgia", "objects": ["college", "dorm", "lecture hall"], "spatial": "crowded", "color": "#AB47BC", "accent": "#7B1FA2", "geometry": "box", "scale": 0.7, "height": 7.23, "position": {"x": -16.51, "y": 3.61, "z": -2.92}, "snippet": "last day of college", "date": "2026-07-06 20:08"}, {"index": 5, "emotion": "nostalgia", "objects": ["school", "classroom", "hallway"], "spatial": "crowded", "color": "#AB47BC", "accent": "#7B1FA2", "geometry": "cylinder", "scale": 0.7, "height": 8.99, "position": {"x": 15.5, "y": 4.49, "z": -9.86}, "snippet": "last day of school", "date": "2026-07-06 20:17"}, {"index": 6, "emotion": "nostalgia", "objects": ["calendar", "clock"], "spatial": "neutral", "color": "#AB47BC", "accent": "#F06292", "geometry": "box", "scale": 1.0, "height": 10.18, "position": {"x": -5.15, "y": 5.09, "z": 19.16}, "snippet": "last day of year", "date": "2026-07-06 20:30"}, {"index": 7, "emotion": "neutral", "objects": ["calendar", "date", "month"], "spatial": "neutral", "color": "#B0BEC5", "accent": "#4DD0E1", "geometry": "box", "scale": 1.0, "height": 10.27, "position": {"x": -9.78, "y": 5.13, "z": -18.83}, "snippet": "last day of month", "date": "2026-07-06 20:40"}, {"index": 8, "emotion": "fear", "objects": ["college", "campus", "classroom"], "spatial": "crowded", "color": "#37474F", "accent": "#00E676", "geometry": "box", "scale": 0.7, "height": 42.42, "position": {"x": 21.13, "y": 21.21, "z": 7.72}, "snippet": "my 1st day in college and I am so nervous", "date": "2026-07-06 20:54"}, {"index": 9, "emotion": "joy", "objects": ["clock", "fireworks", "people"], "spatial": "crowded", "color": "#FFEB3B", "accent": "#FF6D00", "geometry": "box", "scale": 0.7, "height": 36.4, "position": {"x": -21.92, "y": 18.2, "z": 9.05}, "snippet": "the new year", "date": "2026-07-06 21:10"}];
 
 const scene = new THREE.Scene();
 scene.fog = new THREE.FogExp2(0x070c1e, 0.013);
@@ -63,14 +63,16 @@ let nightSkyTex;
   skyCanvas.width = skyW; skyCanvas.height = skyH;
   const ctx = skyCanvas.getContext('2d');
 
-  // Vertical gradient: bright zenith blue fading through a lit horizon
-  // band (city glow) down to the ground - noticeably more color than a
-  // near-black void.
+  // Vertical gradient: bright zenith blue fading through a violet dusk
+  // band and a lit horizon (city glow) down to the ground - noticeably
+  // more color and mood than a near-black void, closer to the purple
+  // night-sky feel in the Git City reference.
   const grad = ctx.createLinearGradient(0, 0, 0, skyH);
-  grad.addColorStop(0, '#050b1f');
-  grad.addColorStop(0.45, '#0a1638');
-  grad.addColorStop(0.72, '#1b3468');
-  grad.addColorStop(0.88, '#2c4d86');
+  grad.addColorStop(0, '#080a24');
+  grad.addColorStop(0.35, '#151246');
+  grad.addColorStop(0.6, '#2c1f5e');
+  grad.addColorStop(0.8, '#4a2f66');
+  grad.addColorStop(0.92, '#3a3468');
   grad.addColorStop(1, '#0a1230');
   ctx.fillStyle = grad;
   ctx.fillRect(0, 0, skyW, skyH);
@@ -165,22 +167,41 @@ scene.add(sun);
 
 // Starfield - small white points scattered on a big sphere, purely
 // cosmetic, gives the night-city atmosphere Git City has.
-{
-  const starCount = 900;
-  const starPositions = new Float32Array(starCount * 3);
-  for (let i = 0; i < starCount; i++) {
-    const r = 300 + Math.random() * 300;
+//
+// BUG FIX: the sky dome above explicitly sets `fog: false` so it renders
+// at full brightness regardless of distance - but this starfield material
+// never did. With FogExp2's squared falloff, anything ~300+ units out
+// (where the stars live) was being fogged to fully invisible before this
+// fix, which is why no stars were showing up at all.
+//
+// Two size tiers (many small dim stars + a sparser handful of bigger
+// bright ones, some warm-tinted) reads as a much richer sky than one
+// uniform field, closer to the dense, varied night sky in the reference.
+function buildStarLayer(count, size, opacity, colorPalette) {
+  const positions = new Float32Array(count * 3);
+  const colors = new Float32Array(count * 3);
+  const tmpColor = new THREE.Color();
+  for (let i = 0; i < count; i++) {
+    const r = 300 + Math.random() * 340;
     const theta = Math.random() * Math.PI * 2;
     const phi = Math.acos(2 * Math.random() - 1);
-    starPositions[i*3]   = r * Math.sin(phi) * Math.cos(theta);
-    starPositions[i*3+1] = Math.abs(r * Math.cos(phi));
-    starPositions[i*3+2] = r * Math.sin(phi) * Math.sin(theta);
+    positions[i*3]   = r * Math.sin(phi) * Math.cos(theta);
+    positions[i*3+1] = Math.abs(r * Math.cos(phi));
+    positions[i*3+2] = r * Math.sin(phi) * Math.sin(theta);
+    tmpColor.set(colorPalette[Math.floor(Math.random() * colorPalette.length)]);
+    colors[i*3] = tmpColor.r; colors[i*3+1] = tmpColor.g; colors[i*3+2] = tmpColor.b;
   }
-  const starGeo = new THREE.BufferGeometry();
-  starGeo.setAttribute('position', new THREE.BufferAttribute(starPositions, 3));
-  const starMat = new THREE.PointsMaterial({ color: 0xffffff, size: 1.6, sizeAttenuation: true, transparent: true, opacity: 0.9 });
-  scene.add(new THREE.Points(starGeo, starMat));
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+  geo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+  const mat = new THREE.PointsMaterial({
+    size, sizeAttenuation: true, transparent: true, opacity,
+    vertexColors: true, fog: false, depthWrite: false,
+  });
+  return new THREE.Points(geo, mat);
 }
+scene.add(buildStarLayer(1400, 1.3, 0.75, [0xffffff, 0xdbe6ff, 0xcfe0ff]));
+scene.add(buildStarLayer(180, 2.6, 0.95, [0xffffff, 0xfff2d6, 0xd8ecff]));
 
 // Ground - subtle radial gradient + faint grid, instead of one flat color,
 // so the plaza reads as a lit surface rather than a dark cutout.
@@ -226,108 +247,123 @@ function makeGeometry(key, s, h) {
   }
 }
 
-// Baked facade texture: window grid + 1-2 random accent-colored floor bands,
-// painted onto a single canvas instead of dozens of individual window plane
-// meshes. This is what gives GitCity-style buildings their "designed"
-// texture (colored stripes, varied window states) instead of a flat tint,
-// and it's much cheaper to render than one mesh per window.
+// Baked facade textures: a dense window grid painted onto TWO aligned
+// canvases - a diffuse/color map and a matching emissive map. Earlier
+// version only tinted window color on one map, so lit windows never
+// actually emitted light (flat, "didn't look good" against a dark scene).
+// Now every lit window's pixels are also painted bright on a black
+// emissive canvas, so it genuinely glows like Git City's skyline - dark
+// windows stay pure black on the emissive map and contribute no light at
+// all, which is what makes the lit ones pop by contrast.
 function buildFacadeTexture(accentHex, h) {
-  const texW = 192, texH = 384;
-  const canvas = document.createElement('canvas');
-  canvas.width = texW; canvas.height = texH;
-  const ctx = canvas.getContext('2d');
+  const texW = 256, texH = 512;
 
-  // Dark graphite/navy facade (Git City style) instead of a light gray
-  // panel - this is what makes the lit windows actually pop instead of
-  // reading as a flat pale wall.
-  ctx.fillStyle = '#0c1120';
-  ctx.fillRect(0, 0, texW, texH);
-
-  // faint vertical panel seams
-  ctx.strokeStyle = 'rgba(255,255,255,0.05)';
-  const seams = 6;
-  for (let i = 1; i < seams; i++) {
-    ctx.beginPath(); ctx.moveTo(i * texW / seams, 0); ctx.lineTo(i * texW / seams, texH); ctx.stroke();
-  }
-
-  // Row count scales with the building's real height so windows stay
-  // roughly floor-sized instead of stretching thin on tall towers.
-  const rows = Math.max(14, Math.min(90, Math.round((h || 12) * 2.4)));
-  const cols = 9;
+  // Denser grid than before (14 cols instead of 9, more rows per unit of
+  // height) - tighter, blockier windows closer to Git City's packed pixel
+  // facades instead of a sparse dot pattern.
+  const rows = Math.max(20, Math.min(160, Math.round((h || 12) * 3.4)));
+  const cols = 14;
   const cellW = texW / cols, cellH = texH / rows;
 
-  // faint horizontal floor divider lines
-  ctx.strokeStyle = 'rgba(255,255,255,0.04)';
-  for (let r = 1; r < rows; r++) {
-    ctx.beginPath(); ctx.moveTo(0, r * cellH); ctx.lineTo(texW, r * cellH); ctx.stroke();
-  }
-
+  // Roll every cell's state ONCE and reuse it for both canvases, so the
+  // "glow" on the emissive map lines up pixel-for-pixel with the window
+  // drawn on the color map.
   const bandRows = new Set();
   const bandCount = 1 + Math.floor(Math.random() * 2);
   for (let i = 0; i < bandCount; i++) bandRows.add(Math.floor(Math.random() * rows));
 
+  const grid = [];
   for (let r = 0; r < rows; r++) {
-    const isBand = bandRows.has(r);
+    const row = [];
     for (let c = 0; c < cols; c++) {
-      // Tighter padding than before - windows sit closer together as
-      // near-solid blocks, closer to Git City's blocky pixel-grid facades
-      // instead of small isolated dots with a lot of dark gap around them.
-      const pad = cellW * 0.1;
-      const x = c * cellW + pad, y = r * cellH + cellH * 0.12;
-      const wsz = cellW - 2 * pad, hsz = cellH * 0.76;
-      if (isBand) {
-        ctx.globalAlpha = 0.85;
-        ctx.fillStyle = accentHex;
-      } else {
-        // Roughly half the windows lit at rest - a livelier, more
-        // Git-City-like twinkling skyline instead of a mostly-dark one.
-        const roll = Math.random();
-        if (roll > 0.62) {
-          ctx.globalAlpha = 0.9;
-          ctx.fillStyle = '#ffce6b';
-        } else if (roll > 0.48) {
-          ctx.globalAlpha = 0.85;
-          ctx.fillStyle = '#8fd8ff';
-        } else {
-          ctx.globalAlpha = 0.9;
-          ctx.fillStyle = '#141b30';
+      if (bandRows.has(r)) { row.push('band'); continue; }
+      const roll = Math.random();
+      // ~58% of windows lit at rest - a lively, twinkling skyline.
+      row.push(roll > 0.58 ? 'warm' : roll > 0.42 ? 'cool' : 'dark');
+    }
+    grid.push(row);
+  }
+
+  function paintWindows(ctx, emissivePass) {
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        const state = grid[r][c];
+        const pad = cellW * 0.07;
+        const x = c * cellW + pad, y = r * cellH + cellH * 0.09;
+        const wsz = cellW - 2 * pad, hsz = cellH * 0.82;
+        if (!emissivePass) {
+          ctx.fillStyle = state === 'band' ? accentHex
+            : state === 'warm' ? '#caa568'
+            : state === 'cool' ? '#6f93ad'
+            : '#0a0e1c';
+          ctx.fillRect(x, y, wsz, hsz);
+        } else if (state !== 'dark') {
+          // Bright window pixel + a soft blurred halo behind it, so each
+          // lit window reads as a real light source (a cheap per-window
+          // bloom) instead of a flat colored square.
+          ctx.fillStyle = state === 'band' ? accentHex : state === 'warm' ? '#ffe2a6' : '#c7ecff';
+          ctx.shadowColor = ctx.fillStyle;
+          ctx.shadowBlur = cellW * 0.8;
+          ctx.fillRect(x, y, wsz, hsz);
+          ctx.shadowBlur = 0;
         }
       }
-      ctx.fillRect(x, y, wsz, hsz);
-      ctx.globalAlpha = 1;
     }
   }
 
-  // grime/noise speckle - tiny dark specks scattered across the facade so
-  // it reads as a weathered surface instead of a clean flat render
-  ctx.globalAlpha = 0.08;
-  ctx.fillStyle = '#000000';
-  for (let i = 0; i < 260; i++) {
-    const sx = Math.random() * texW, sy = Math.random() * texH;
-    ctx.fillRect(sx, sy, 1.5, 1.5);
+  // --- diffuse/color canvas ---
+  const colorCanvas = document.createElement('canvas');
+  colorCanvas.width = texW; colorCanvas.height = texH;
+  const cctx = colorCanvas.getContext('2d');
+  cctx.fillStyle = '#0c1120';
+  cctx.fillRect(0, 0, texW, texH);
+  cctx.strokeStyle = 'rgba(255,255,255,0.05)';
+  for (let i = 1; i < 7; i++) {
+    cctx.beginPath(); cctx.moveTo(i * texW / 7, 0); cctx.lineTo(i * texW / 7, texH); cctx.stroke();
   }
-  ctx.globalAlpha = 1;
+  cctx.strokeStyle = 'rgba(255,255,255,0.04)';
+  for (let r = 1; r < rows; r++) {
+    cctx.beginPath(); cctx.moveTo(0, r * cellH); cctx.lineTo(texW, r * cellH); cctx.stroke();
+  }
+  paintWindows(cctx, false);
+  // grime/noise speckle so the facade reads as weathered, not a clean render
+  cctx.globalAlpha = 0.08;
+  cctx.fillStyle = '#000000';
+  for (let i = 0; i < 420; i++) {
+    cctx.fillRect(Math.random() * texW, Math.random() * texH, 1.5, 1.5);
+  }
+  cctx.globalAlpha = 1;
 
-  const tex = new THREE.CanvasTexture(canvas);
-  tex.wrapS = THREE.RepeatWrapping;
-  tex.wrapT = THREE.RepeatWrapping;
-  // Nearest filtering keeps window edges crisp and blocky (Git City's
-  // pixel-art look) instead of the soft blur mipmapping/bilinear filtering
-  // gives by default, which was flattening the grid into a smear from
-  // any distance.
-  tex.magFilter = THREE.NearestFilter;
-  tex.minFilter = THREE.NearestFilter;
-  return tex;
+  // --- emissive canvas (black = no light, bright = a real glowing window) ---
+  const emCanvas = document.createElement('canvas');
+  emCanvas.width = texW; emCanvas.height = texH;
+  const ectx = emCanvas.getContext('2d');
+  ectx.fillStyle = '#000000';
+  ectx.fillRect(0, 0, texW, texH);
+  paintWindows(ectx, true);
+
+  function toTexture(canvas) {
+    const t = new THREE.CanvasTexture(canvas);
+    t.wrapS = THREE.RepeatWrapping;
+    t.wrapT = THREE.RepeatWrapping;
+    // Nearest filtering keeps window edges crisp and blocky (Git City's
+    // pixel-art look) instead of the soft blur mipmapping gives by default.
+    t.magFilter = THREE.NearestFilter;
+    t.minFilter = THREE.NearestFilter;
+    return t;
+  }
+
+  return { colorMap: toTexture(colorCanvas), emissiveMap: toTexture(emCanvas) };
 }
 
-// Roof cap + rooftop greebles + base plinth. capScale/plinthScale let a
-// tiered tower's cap match its (narrower) top tier while the plinth still
-// matches its (wider) base tier.
-function addRoofDetails(parent, key, plinthScale, capScale, h, accentColor) {
+// Roof cap + rooftop greebles + base plinth. baseWidth/capWidth are now
+// real width/diameter units (not the old 0.6-1.4 emotional scale factor),
+// so these details stay properly proportioned now that towers are wider.
+function addRoofDetails(parent, key, baseWidth, capWidth, h, accentColor) {
   if (key === 'box' || key === 'cylinder') {
     const capGeo = key === 'box'
-      ? new THREE.BoxGeometry(1.9 * capScale * 1.1, 0.18, 1.9 * capScale * 1.1)
-      : new THREE.CylinderGeometry(0.98 * capScale * 1.12, 0.98 * capScale * 1.12, 0.18, 20);
+      ? new THREE.BoxGeometry(capWidth * 1.08, 0.18, capWidth * 1.08)
+      : new THREE.CylinderGeometry(capWidth * 0.56, capWidth * 0.56, 0.18, 20);
     const capMat = new THREE.MeshStandardMaterial({
       color: new THREE.Color(accentColor), emissive: new THREE.Color(accentColor),
       emissiveIntensity: 0.5, roughness: 0.4, metalness: 0.5,
@@ -341,28 +377,28 @@ function addRoofDetails(parent, key, plinthScale, capScale, h, accentColor) {
     // clutter that reads as "real building" from a distance.
     const greebleMat = new THREE.MeshStandardMaterial({ color: 0x555560, roughness: 0.7, metalness: 0.3 });
     if (Math.random() > 0.4) {
-      const acUnit = new THREE.Mesh(new THREE.BoxGeometry(0.35 * capScale, 0.22, 0.35 * capScale), greebleMat);
-      acUnit.position.set(0.4 * capScale, h / 2 + 0.28, 0.3 * capScale);
+      const acUnit = new THREE.Mesh(new THREE.BoxGeometry(0.16 * capWidth, 0.22, 0.16 * capWidth), greebleMat);
+      acUnit.position.set(0.22 * capWidth, h / 2 + 0.28, 0.16 * capWidth);
       acUnit.castShadow = true;
       parent.add(acUnit);
     }
     if (Math.random() > 0.55) {
-      const tank = new THREE.Mesh(new THREE.CylinderGeometry(0.16 * capScale, 0.16 * capScale, 0.4, 10), greebleMat);
-      tank.position.set(-0.35 * capScale, h / 2 + 0.38, -0.25 * capScale);
+      const tank = new THREE.Mesh(new THREE.CylinderGeometry(0.08 * capWidth, 0.08 * capWidth, 0.4, 10), greebleMat);
+      tank.position.set(-0.18 * capWidth, h / 2 + 0.38, -0.13 * capWidth);
       tank.castShadow = true;
       parent.add(tank);
     }
     if (Math.random() > 0.5) {
       const antenna = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.02, 0.02, 0.6 * capScale + 0.4, 6),
+        new THREE.CylinderGeometry(0.02, 0.02, 0.28 * capWidth + 0.4, 6),
         new THREE.MeshStandardMaterial({ color: 0x888899, emissive: 0xff4444, emissiveIntensity: 0.3 })
       );
-      antenna.position.y = h / 2 + 0.5 * capScale + 0.3;
+      antenna.position.y = h / 2 + 0.24 * capWidth + 0.3;
       parent.add(antenna);
     }
   }
 
-  const plinthGeo = new THREE.CylinderGeometry(1.27 * plinthScale + 0.3, 1.4 * plinthScale + 0.4, 0.22, 24);
+  const plinthGeo = new THREE.CylinderGeometry(baseWidth * 0.6 + 0.3, baseWidth * 0.68 + 0.45, 0.22, 24);
   const plinthMat = new THREE.MeshStandardMaterial({ color: 0x14141c, roughness: 0.9 });
   const plinth = new THREE.Mesh(plinthGeo, plinthMat);
   plinth.position.y = -h / 2 - 0.1;
@@ -370,33 +406,54 @@ function addRoofDetails(parent, key, plinthScale, capScale, h, accentColor) {
   plinth.castShadow = true;
   parent.add(plinth);
 
-  addRooftopBeam(parent, capScale, h, accentColor);
-  addGroundRing(parent, plinthScale, h, accentColor);
+  addRooftopBeam(parent, capWidth, h, accentColor);
+  addGroundRing(parent, baseWidth, h, accentColor);
 }
 
 // The vertical "searchlight" shooting up from a rooftop into the sky - the
 // signature Git City effect. Taller (deeper-memory) buildings get a
 // taller, slightly brighter beam, so the effect itself carries meaning
-// instead of being purely decorative.
-function addRooftopBeam(parent, capScale, h, accentColor) {
+// instead of being purely decorative. A thin bright inner core layered
+// inside the soft outer beam gives it the denser, more substantial look
+// from the reference instead of one flat translucent cone.
+function addRooftopBeam(parent, capWidth, h, accentColor) {
   const beamHeight = Math.max(24, h * 1.6);
-  const beamGeo = new THREE.CylinderGeometry(0.1 * capScale + 0.04, 0.16 * capScale + 0.06, beamHeight, 10, 1, true);
+
+  const beamGeo = new THREE.CylinderGeometry(0.05 * capWidth + 0.05, 0.08 * capWidth + 0.09, beamHeight, 12, 1, true);
   const beamMat = new THREE.MeshBasicMaterial({
     map: beamTexture, color: new THREE.Color(accentColor),
-    transparent: true, opacity: 0.55, depthWrite: false,
+    transparent: true, opacity: 0.6, depthWrite: false,
     blending: THREE.AdditiveBlending, side: THREE.DoubleSide,
   });
   const beam = new THREE.Mesh(beamGeo, beamMat);
   beam.position.y = h / 2 + beamHeight / 2 + 0.15;
   parent.add(beam);
+
+  const coreGeo = new THREE.CylinderGeometry(0.016 * capWidth + 0.02, 0.024 * capWidth + 0.03, beamHeight * 0.94, 8, 1, true);
+  const coreMat = new THREE.MeshBasicMaterial({
+    map: beamTexture, color: 0xffffff,
+    transparent: true, opacity: 0.85, depthWrite: false,
+    blending: THREE.AdditiveBlending, side: THREE.DoubleSide,
+  });
+  const core = new THREE.Mesh(coreGeo, coreMat);
+  core.position.y = beam.position.y;
+  parent.add(core);
+
   return beam;
 }
 
-// Flat glowing ring on the ground around the building's base - the
+// Flat glowing ring(s) on the ground around the building's base - the
 // "landing pad" halo visible around towers in the Git City screenshots.
-function addGroundRing(parent, plinthScale, h, accentColor) {
-  const inner = 1.55 * plinthScale + 0.55;
-  const ringGeo = new THREE.RingGeometry(inner, inner + 0.16, 40);
+// A wider soft outer ring plus a thin bright inner ring reads as more
+// detailed/layered than a single flat ring.
+function addGroundRing(parent, baseWidth, h, accentColor) {
+  // Clearance is measured against the plinth's own outer radius
+  // (baseWidth * 0.68 + 0.45, see addRoofDetails) plus a safety margin,
+  // so the ring always sits visibly outside the plinth instead of
+  // clipping into it on wider towers.
+  const inner = baseWidth * 0.75 + 0.9;
+
+  const ringGeo = new THREE.RingGeometry(inner, inner + 0.22, 48);
   const ringMat = new THREE.MeshBasicMaterial({
     color: new THREE.Color(accentColor), transparent: true, opacity: 0.5,
     side: THREE.DoubleSide, blending: THREE.AdditiveBlending, depthWrite: false,
@@ -405,38 +462,61 @@ function addGroundRing(parent, plinthScale, h, accentColor) {
   ring.rotation.x = -Math.PI / 2;
   ring.position.y = -h / 2 - 0.09;
   parent.add(ring);
+
+  const ring2Geo = new THREE.RingGeometry(Math.max(0.1, inner - 0.55), Math.max(0.14, inner - 0.4), 48);
+  const ring2Mat = new THREE.MeshBasicMaterial({
+    color: 0xffffff, transparent: true, opacity: 0.35,
+    side: THREE.DoubleSide, blending: THREE.AdditiveBlending, depthWrite: false,
+  });
+  const ring2 = new THREE.Mesh(ring2Geo, ring2Mat);
+  ring2.rotation.x = -Math.PI / 2;
+  ring2.position.y = -h / 2 - 0.085;
+  parent.add(ring2);
+
   return ring;
 }
 
 // Soft additive glow sprite - cheap stand-in for real bloom postprocessing
 // (which would need extra CDN files we're deliberately avoiding). Sits
-// behind each building's point light and fakes a light-bleed halo.
+// behind each building's point light and fakes a light-bleed halo. Higher
+// resolution + a sharper hot core than before for a more defined glow.
 const glowTexture = (() => {
   const c = document.createElement('canvas');
-  c.width = 128; c.height = 128;
+  c.width = 160; c.height = 160;
   const ctx = c.getContext('2d');
-  const g = ctx.createRadialGradient(64, 64, 0, 64, 64, 64);
-  g.addColorStop(0, 'rgba(255,255,255,0.9)');
-  g.addColorStop(0.4, 'rgba(255,255,255,0.25)');
+  const g = ctx.createRadialGradient(80, 80, 0, 80, 80, 80);
+  g.addColorStop(0, 'rgba(255,255,255,1)');
+  g.addColorStop(0.18, 'rgba(255,255,255,0.75)');
+  g.addColorStop(0.45, 'rgba(255,255,255,0.22)');
   g.addColorStop(1, 'rgba(255,255,255,0)');
   ctx.fillStyle = g;
-  ctx.fillRect(0, 0, 128, 128);
+  ctx.fillRect(0, 0, 160, 160);
   return new THREE.CanvasTexture(c);
 })();
 
 // Vertical fade texture for the rooftop light beams - the "searchlight
 // shooting into the sky" effect from the Git City reference screenshots.
-// Solid near the roof, fading to nothing higher up.
+// Solid near the roof, fading to nothing higher up, with subtle vertical
+// streaks baked in so the beam reads as a volumetric shaft with internal
+// structure instead of one flat gradient smear.
 const beamTexture = (() => {
   const c = document.createElement('canvas');
-  c.width = 8; c.height = 256;
+  c.width = 32; c.height = 320;
   const ctx = c.getContext('2d');
-  const g = ctx.createLinearGradient(0, 256, 0, 0);
+  const g = ctx.createLinearGradient(0, 320, 0, 0);
   g.addColorStop(0, 'rgba(255,255,255,0.95)');
-  g.addColorStop(0.5, 'rgba(255,255,255,0.35)');
+  g.addColorStop(0.3, 'rgba(255,255,255,0.5)');
+  g.addColorStop(0.65, 'rgba(255,255,255,0.18)');
   g.addColorStop(1, 'rgba(255,255,255,0)');
   ctx.fillStyle = g;
-  ctx.fillRect(0, 0, 8, 256);
+  ctx.fillRect(0, 0, 32, 320);
+  ctx.globalCompositeOperation = 'multiply';
+  for (let x = 0; x < 32; x++) {
+    const shade = 0.72 + Math.random() * 0.28;
+    ctx.fillStyle = 'rgba(255,255,255,' + shade + ')';
+    ctx.fillRect(x, 0, 1, 320);
+  }
+  ctx.globalCompositeOperation = 'source-over';
   return new THREE.CanvasTexture(c);
 })();
 
@@ -452,12 +532,22 @@ function addGlowSprite(position, color, scale) {
   return sprite;
 }
 
+// A tower's base width now scales with its own height on a gentle
+// sqrt curve, decoupled from the narrow 0.6-1.4 emotional "scale" factor
+// that used to be the ONLY thing driving width. That's what was producing
+// ~90-unit-tall buildings only ~2.6 units wide (a flagpole, not a tower) -
+// a shallow 12-unit memory now gets a solid ~6-7 unit base, and a deep,
+// 90-unit memory gets a proper ~12-13 unit base, like real skyscrapers.
+function footprintFor(s, h) {
+  return (3.2 + Math.sqrt(Math.max(h, 1)) * 0.95) * s;
+}
+
 // Builds one building as a Group. Box/cylinder memories become a stepped,
-// setback tower (2-3 tiers narrowing upward, wedding-cake style like real
-// skyscrapers / GitCity's silhouettes) with a baked facade texture on every
-// tier. Landmark shapes (sphere, cone, torusKnot, etc, driven by objects
-// like "bicycle" or "tree") stay as single sculptural forms - they're meant
-// to read as monuments, not office towers.
+// setback tower (a slender top tier on a wide base, wedding-cake style like
+// real skyscrapers / GitCity's silhouettes) with a baked facade + emissive
+// window texture on every tier. Landmark shapes (sphere, cone, torusKnot,
+// etc, driven by objects like "bicycle" or "tree") stay as single
+// sculptural forms - they're meant to read as monuments, not office towers.
 function buildBuildingGroup(b, h) {
   const group = new THREE.Group();
   const key = b.geometry, s = b.scale, accent = b.accent;
@@ -477,29 +567,31 @@ function buildBuildingGroup(b, h) {
     mesh.receiveShadow = true;
     group.add(mesh);
     clickable.push(mesh);
-    addRoofDetails(group, key, s, s, h, accent);
+    addRoofDetails(group, key, s * 2, s * 2, h, accent);
     return { group, materials };
   }
 
-  const tex = buildFacadeTexture(accent, h);
-  // Mostly one slender tower with a single narrower cap tier near the top
-  // (a slight setback, not a wedding cake) - reads as a real skyscraper the
-  // taller it gets, instead of visibly shrinking in three big steps.
+  const { colorMap, emissiveMap } = buildFacadeTexture(accent, h);
+  // One wide base tier plus a slender setback top tier once a tower gets
+  // tall enough - reads as a real skyscraper the taller it gets, instead
+  // of visibly shrinking in several big wedding-cake steps.
+  const footprint = footprintFor(s, h);
   const tierCount = h > 14 ? 2 : 1;
-  const heightFracs = tierCount === 2 ? [0.84, 0.16] : [1.0];
-  const widthFactor = 0.7;
+  const heightFracs = tierCount === 2 ? [0.82, 0.18] : [1.0];
+  const widthFactor = 0.72;
   let cursorY = -h / 2;
-  let topScale = s;
+  let topWidth = footprint;
 
   for (let i = 0; i < tierCount; i++) {
     const tierH = h * heightFracs[i];
-    const tierScale = s * Math.pow(widthFactor, i);
-    topScale = tierScale;
+    const tierWidth = footprint * Math.pow(widthFactor, i);
+    topWidth = tierWidth;
     const geo = key === 'box'
-      ? new THREE.BoxGeometry(1.9 * tierScale, tierH, 1.9 * tierScale)
-      : new THREE.CylinderGeometry(0.98 * tierScale, 0.98 * tierScale, tierH, 20);
+      ? new THREE.BoxGeometry(tierWidth, tierH, tierWidth)
+      : new THREE.CylinderGeometry(tierWidth * 0.5, tierWidth * 0.5, tierH, 20);
     const mat = new THREE.MeshStandardMaterial({
-      map: tex, color: 0xffffff, emissive: new THREE.Color(accent), emissiveIntensity: 0.16,
+      map: colorMap, color: 0xffffff,
+      emissive: new THREE.Color(0xffffff), emissiveMap: emissiveMap, emissiveIntensity: 1.15,
       metalness: 0.25, roughness: 0.5, envMapIntensity: 0.8,
     });
     materials.push(mat);
@@ -513,7 +605,7 @@ function buildBuildingGroup(b, h) {
     cursorY += tierH;
   }
 
-  addRoofDetails(group, key, s, topScale, h, accent);
+  addRoofDetails(group, key, footprint, topWidth, h, accent);
   return { group, materials };
 }
 
@@ -559,6 +651,42 @@ BUILDINGS.forEach(b => {
     baseSpriteScale,
   };
 });
+
+// Ambient drifting light motes scattered across the whole city footprint -
+// tiny colorful specks (warm gold + a few magenta/cyan accents, echoing
+// the little glints scattered across facades in the reference) that drift
+// slowly upward. Purely decorative texture/detail, cheap to render as one
+// particle system rather than per-building effects.
+{
+  const moteCount = 260;
+  const spread = Math.max(30, maxRadius * 1.3 + 10);
+  const positions = new Float32Array(moteCount * 3);
+  const colors = new Float32Array(moteCount * 3);
+  const speeds = new Float32Array(moteCount);
+  const moteColors = [0xffd27a, 0xff8fd6, 0x7fe0ff, 0xfff2c2];
+  const tmpColor = new THREE.Color();
+  for (let i = 0; i < moteCount; i++) {
+    const ang = Math.random() * Math.PI * 2;
+    const rad = Math.random() * spread;
+    positions[i*3] = Math.cos(ang) * rad;
+    positions[i*3+1] = Math.random() * Math.max(20, maxHeight * 0.9);
+    positions[i*3+2] = Math.sin(ang) * rad;
+    tmpColor.set(moteColors[Math.floor(Math.random() * moteColors.length)]);
+    colors[i*3] = tmpColor.r; colors[i*3+1] = tmpColor.g; colors[i*3+2] = tmpColor.b;
+    speeds[i] = 0.15 + Math.random() * 0.35;
+  }
+  const moteGeo = new THREE.BufferGeometry();
+  moteGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+  moteGeo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+  const moteMat = new THREE.PointsMaterial({
+    size: 0.55, sizeAttenuation: true, transparent: true, opacity: 0.75,
+    vertexColors: true, depthWrite: false, blending: THREE.AdditiveBlending,
+  });
+  const motes = new THREE.Points(moteGeo, moteMat);
+  scene.add(motes);
+  const moteTop = Math.max(24, maxHeight * 0.95);
+  window.__memoryMotes = { motes, speeds, top: moteTop };
+}
 
 // Selecting a building boosts its own glow (facade emissive, point light,
 // halo sprite) well above the resting city glow, then reverts the previous
@@ -719,6 +847,20 @@ let firstFrameRendered = false;
 function animate() {
   requestAnimationFrame(animate);
   stepCameraTowardGoal();
+
+  // Drift the ambient light motes gently upward, looping back to the
+  // ground once they clear the tallest tower, instead of a static sprinkle.
+  const moteState = window.__memoryMotes;
+  if (moteState) {
+    const posAttr = moteState.motes.geometry.attributes.position;
+    for (let i = 0; i < moteState.speeds.length; i++) {
+      let y = posAttr.getY(i) + moteState.speeds[i] * 0.045;
+      if (y > moteState.top) y = 0;
+      posAttr.setY(i, y);
+    }
+    posAttr.needsUpdate = true;
+  }
+
   renderer.render(scene, camera);
   if (!firstFrameRendered) {
     firstFrameRendered = true;
