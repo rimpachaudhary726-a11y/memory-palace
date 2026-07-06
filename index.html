@@ -449,6 +449,8 @@ function addRoofDetails(parent, key, baseWidth, capWidth, h, accentColor) {
 
   addRooftopBeam(parent, capWidth, h, accentColor);
   addGroundRing(parent, baseWidth, h, accentColor);
+  addRoofOrb(parent, capWidth, h, accentColor);
+  addEnergyLines(parent, key, baseWidth, h, accentColor);
 }
 
 // The vertical "searchlight" shooting up from a rooftop into the sky - the
@@ -560,6 +562,92 @@ const beamTexture = (() => {
   ctx.globalCompositeOperation = 'source-over';
   return new THREE.CanvasTexture(c);
 })();
+
+// Vertical "data stream" texture for the sides of a tower - a handful of
+// bright glowing lines against a transparent background, tiled vertically.
+// In the animate loop we slide this texture's offset.y downward every
+// frame, which makes the streaks themselves appear to travel UP the
+// building (the "energy climbing the tower" look from the Git City
+// reference). Kept as an overlay mesh slightly larger than the facade so
+// it never z-fights with the window texture underneath.
+const energyTexture = (() => {
+  const c = document.createElement('canvas');
+  c.width = 64; c.height = 256;
+  const ctx = c.getContext('2d');
+  ctx.clearRect(0, 0, 64, 256);
+  const lineCount = 3 + Math.floor(Math.random() * 2);
+  for (let i = 0; i < lineCount; i++) {
+    const x = 6 + Math.random() * 52;
+    const w = 1.4 + Math.random() * 2.2;
+    const segH = 26 + Math.random() * 46;
+    const y = Math.random() * 256;
+    const grad = ctx.createLinearGradient(0, y, 0, y - segH);
+    grad.addColorStop(0, 'rgba(255,255,255,0)');
+    grad.addColorStop(0.5, 'rgba(255,255,255,0.9)');
+    grad.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.fillStyle = grad;
+    ctx.fillRect(x, y - segH, w, segH);
+  }
+  const tex = new THREE.CanvasTexture(c);
+  tex.wrapS = THREE.RepeatWrapping;
+  tex.wrapT = THREE.RepeatWrapping;
+  return tex;
+})();
+
+// Every mesh/material pair registered here gets its texture offset nudged
+// upward each animation frame - this is what actually drives the
+// "moving from down to up" motion on the building sides.
+const scrollingEnergyMaterials = [];
+
+// Thin glowing vertical streak lines wrapped around a tower's sides,
+// slightly outside the facade radius/width so they read as an energy
+// skin climbing the building rather than clipping into the windows.
+function addEnergyLines(parent, key, footprint, h, accentColor) {
+  const tex = energyTexture.clone();
+  tex.needsUpdate = true;
+  tex.repeat.set(key === 'cylinder' ? 3 : 4, Math.max(1, h / 10));
+  const mat = new THREE.MeshBasicMaterial({
+    map: tex, color: new THREE.Color(accentColor),
+    transparent: true, opacity: 0.85, depthWrite: false,
+    blending: THREE.AdditiveBlending, side: THREE.DoubleSide,
+  });
+  const geo = key === 'cylinder'
+    ? new THREE.CylinderGeometry(footprint * 0.505, footprint * 0.505, h * 0.98, 20, 1, true)
+    : new THREE.BoxGeometry(footprint * 1.012, h * 0.98, footprint * 1.012);
+  const mesh = new THREE.Mesh(geo, mat);
+  parent.add(mesh);
+  scrollingEnergyMaterials.push(mat);
+  return mesh;
+}
+
+// The glowing orb/gem sitting on the rooftop, right where the searchlight
+// beam begins - the "spherical tower cap" from the Git City reference. A
+// solid glassy core plus a slightly larger wireframe shell around it so it
+// reads as a faceted gem rather than a flat glowing ball, and it gets a
+// gentle continuous spin in the animate loop.
+function addRoofOrb(parent, capWidth, h, accentColor) {
+  const orbRadius = Math.max(0.35, capWidth * 0.16);
+  const coreMat = new THREE.MeshStandardMaterial({
+    color: new THREE.Color(accentColor), emissive: new THREE.Color(accentColor),
+    emissiveIntensity: 1.4, metalness: 0.2, roughness: 0.15, transparent: true, opacity: 0.9,
+  });
+  const core = new THREE.Mesh(new THREE.IcosahedronGeometry(orbRadius, 1), coreMat);
+  core.position.y = h / 2 + orbRadius + 0.22;
+  parent.add(core);
+
+  const shellMat = new THREE.MeshBasicMaterial({
+    color: 0xffffff, wireframe: true, transparent: true, opacity: 0.55,
+    blending: THREE.AdditiveBlending, depthWrite: false,
+  });
+  const shell = new THREE.Mesh(new THREE.IcosahedronGeometry(orbRadius * 1.35, 1), shellMat);
+  shell.position.copy(core.position);
+  parent.add(shell);
+
+  spinningOrbs.push({ core, shell });
+  return core;
+}
+
+const spinningOrbs = [];
 
 function addGlowSprite(position, color, scale) {
   const mat = new THREE.SpriteMaterial({
@@ -900,6 +988,24 @@ function animate() {
       posAttr.setY(i, y);
     }
     posAttr.needsUpdate = true;
+  }
+
+  // Scroll every building's side energy-lines texture so the streaks
+  // themselves appear to travel up the facade (subtracting from offset.y
+  // moves the pattern upward across the surface).
+  for (let i = 0; i < scrollingEnergyMaterials.length; i++) {
+    const mat = scrollingEnergyMaterials[i];
+    mat.map.offset.y -= 0.012;
+  }
+
+  // Gentle continuous spin on each rooftop orb/gem, core and wireframe
+  // shell rotating at slightly different rates so it doesn't read as one
+  // rigid rotating solid.
+  for (let i = 0; i < spinningOrbs.length; i++) {
+    const o = spinningOrbs[i];
+    o.core.rotation.y += 0.01;
+    o.shell.rotation.y -= 0.006;
+    o.shell.rotation.x += 0.004;
   }
 
   renderer.render(scene, camera);
