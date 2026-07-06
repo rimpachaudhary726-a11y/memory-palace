@@ -25,7 +25,6 @@
   #status.error { color:#ff6b6b; border-color:#ff6b6b; }
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/examples/js/controls/OrbitControls.js"></script>
 </head>
 <body>
 <div id="hint">drag to orbit - scroll to zoom - tap a building to recall its memory</div>
@@ -41,21 +40,30 @@ window.addEventListener('error', function(e) {
 });
 
 try {
-const BUILDINGS = [{"index": 0, "emotion": "joy", "objects": [], "spatial": "neutral", "color": "#FFEB3B", "accent": "#FF9800", "geometry": "box", "scale": 1.0, "height": 2.5, "position": {"x": 3.2, "y": 1.25, "z": 0.0}, "snippet": "I remember my first day of school. I was nervous but excited.", "date": "2026-07-06 19:02"}, {"index": 1, "emotion": "nostalgia", "objects": ["school", "classroom", "hallway", "backpack"], "spatial": "open", "color": "#AB47BC", "accent": "#7B1FA2", "geometry": "cylinder", "scale": 1.4, "height": 3.1, "position": {"x": -3.34, "y": 1.55, "z": 3.06}, "snippet": "last day of school", "date": "2026-07-06 19:11"}];
+const BUILDINGS = [{"index": 0, "emotion": "joy", "objects": [], "spatial": "neutral", "color": "#FFEB3B", "accent": "#FF9800", "geometry": "box", "scale": 1.0, "height": 2.5, "position": {"x": 3.2, "y": 1.25, "z": 0.0}, "snippet": "I remember my first day of school. I was nervous but excited.", "date": "2026-07-06 19:02"}, {"index": 1, "emotion": "nostalgia", "objects": ["school", "classroom", "hallway", "backpack"], "spatial": "open", "color": "#AB47BC", "accent": "#7B1FA2", "geometry": "cylinder", "scale": 1.4, "height": 3.1, "position": {"x": -3.34, "y": 1.55, "z": 3.06}, "snippet": "last day of school", "date": "2026-07-06 19:11"}, {"index": 2, "emotion": "nostalgia", "objects": ["school", "classroom", "desk", "lockers"], "spatial": "crowded", "color": "#AB47BC", "accent": "#7B1FA2", "geometry": "cylinder", "scale": 0.7, "height": 2.05, "position": {"x": 0.48, "y": 1.02, "z": -5.52}, "snippet": "my last day of school", "date": "2026-07-06 19:44"}];
 
 const scene = new THREE.Scene();
 scene.fog = new THREE.FogExp2(0x05050a, 0.015);
 
 const camera = new THREE.PerspectiveCamera(60, window.innerWidth/window.innerHeight, 0.1, 2000);
-camera.position.set(0, 18, 34);
 
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
-const controls = new THREE.OrbitControls(camera, renderer.domElement);
-controls.enableDamping = true;
-controls.maxPolarAngle = Math.PI * 0.49;
+// Small built-in orbit camera (no OrbitControls.js dependency - that file
+// isn't reliably available from CDNs for a plain script tag anymore, so
+// this avoids the external-file failure point entirely).
+let camDistance = 34, camTheta = 0.0, camPhi = 1.0;
+function updateCamera() {
+  camPhi = Math.max(0.15, Math.min(1.5, camPhi));
+  camDistance = Math.max(6, Math.min(160, camDistance));
+  camera.position.x = camDistance * Math.sin(camPhi) * Math.sin(camTheta);
+  camera.position.y = camDistance * Math.cos(camPhi);
+  camera.position.z = camDistance * Math.sin(camPhi) * Math.cos(camTheta);
+  camera.lookAt(0, 3, 0);
+}
+updateCamera();
 
 scene.add(new THREE.AmbientLight(0x404050, 1.1));
 const sun = new THREE.DirectionalLight(0xffffff, 0.9);
@@ -127,17 +135,40 @@ function handlePick(clientX, clientY) {
   }
 }
 
-renderer.domElement.addEventListener('click', (e) => handlePick(e.clientX, e.clientY));
-renderer.domElement.addEventListener('touchend', (e) => {
-  if (e.changedTouches && e.changedTouches[0]) {
-    handlePick(e.changedTouches[0].clientX, e.changedTouches[0].clientY);
-  }
+let isDragging = false, dragMoved = false, lastX = 0, lastY = 0;
+
+renderer.domElement.addEventListener('pointerdown', (e) => {
+  isDragging = true;
+  dragMoved = false;
+  lastX = e.clientX;
+  lastY = e.clientY;
 });
+
+renderer.domElement.addEventListener('pointermove', (e) => {
+  if (!isDragging) return;
+  const dx = e.clientX - lastX;
+  const dy = e.clientY - lastY;
+  if (Math.abs(dx) > 3 || Math.abs(dy) > 3) dragMoved = true;
+  camTheta -= dx * 0.006;
+  camPhi -= dy * 0.006;
+  lastX = e.clientX;
+  lastY = e.clientY;
+  updateCamera();
+});
+
+renderer.domElement.addEventListener('pointerup', (e) => {
+  isDragging = false;
+  if (!dragMoved) handlePick(e.clientX, e.clientY);
+});
+
+renderer.domElement.addEventListener('wheel', (e) => {
+  camDistance += e.deltaY * 0.03;
+  updateCamera();
+}, { passive: true });
 
 let firstFrameRendered = false;
 function animate() {
   requestAnimationFrame(animate);
-  controls.update();
   renderer.render(scene, camera);
   if (!firstFrameRendered) {
     firstFrameRendered = true;
