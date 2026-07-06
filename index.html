@@ -40,7 +40,7 @@ window.addEventListener('error', function(e) {
 });
 
 try {
-const BUILDINGS = [{"index": 0, "emotion": "joy", "objects": [], "spatial": "neutral", "color": "#FFEB3B", "accent": "#FF9800", "geometry": "box", "scale": 1.0, "height": 2.5, "position": {"x": 7.5, "y": 1.25, "z": 0.0}, "snippet": "I remember my first day of school. I was nervous but excited.", "date": "2026-07-06 19:02"}, {"index": 1, "emotion": "nostalgia", "objects": ["school", "classroom", "hallway", "backpack"], "spatial": "open", "color": "#AB47BC", "accent": "#7B1FA2", "geometry": "cylinder", "scale": 1.4, "height": 3.1, "position": {"x": -7.82, "y": 1.55, "z": 7.16}, "snippet": "last day of school", "date": "2026-07-06 19:11"}, {"index": 2, "emotion": "nostalgia", "objects": ["school", "classroom", "desk", "lockers"], "spatial": "crowded", "color": "#AB47BC", "accent": "#7B1FA2", "geometry": "cylinder", "scale": 0.7, "height": 2.05, "position": {"x": 1.14, "y": 1.02, "z": -12.94}, "snippet": "my last day of school", "date": "2026-07-06 19:44"}, {"index": 3, "emotion": "nostalgia", "objects": ["school", "classroom", "lockers", "desk"], "spatial": "crowded", "color": "#AB47BC", "accent": "#7B1FA2", "geometry": "cylinder", "scale": 0.7, "height": 2.69, "position": {"x": 9.13, "y": 1.35, "z": 11.9}, "snippet": "last day of school", "date": "2026-07-06 19:55"}, {"index": 4, "emotion": "nostalgia", "objects": ["college", "dorm", "lecture hall"], "spatial": "crowded", "color": "#AB47BC", "accent": "#7B1FA2", "geometry": "box", "scale": 0.7, "height": 7.23, "position": {"x": -16.51, "y": 3.61, "z": -2.92}, "snippet": "last day of college", "date": "2026-07-06 20:08"}, {"index": 5, "emotion": "nostalgia", "objects": ["school", "classroom", "hallway"], "spatial": "crowded", "color": "#AB47BC", "accent": "#7B1FA2", "geometry": "cylinder", "scale": 0.7, "height": 8.99, "position": {"x": 15.5, "y": 4.49, "z": -9.86}, "snippet": "last day of school", "date": "2026-07-06 20:17"}, {"index": 6, "emotion": "nostalgia", "objects": ["calendar", "clock"], "spatial": "neutral", "color": "#AB47BC", "accent": "#F06292", "geometry": "box", "scale": 1.0, "height": 10.18, "position": {"x": -5.15, "y": 5.09, "z": 19.16}, "snippet": "last day of year", "date": "2026-07-06 20:30"}, {"index": 7, "emotion": "neutral", "objects": ["calendar", "date", "month"], "spatial": "neutral", "color": "#B0BEC5", "accent": "#4DD0E1", "geometry": "box", "scale": 1.0, "height": 10.27, "position": {"x": -9.78, "y": 5.13, "z": -18.83}, "snippet": "last day of month", "date": "2026-07-06 20:40"}, {"index": 8, "emotion": "fear", "objects": ["college", "campus", "classroom"], "spatial": "crowded", "color": "#37474F", "accent": "#00E676", "geometry": "box", "scale": 0.7, "height": 42.42, "position": {"x": 21.13, "y": 21.21, "z": 7.72}, "snippet": "my 1st day in college and I am so nervous", "date": "2026-07-06 20:54"}, {"index": 9, "emotion": "joy", "objects": ["clock", "fireworks", "people"], "spatial": "crowded", "color": "#FFEB3B", "accent": "#FF6D00", "geometry": "box", "scale": 0.7, "height": 36.4, "position": {"x": -21.92, "y": 18.2, "z": 9.05}, "snippet": "the new year", "date": "2026-07-06 21:10"}];
+const BUILDINGS = [{"index": 0, "emotion": "joy", "objects": [], "spatial": "neutral", "color": "#FFEB3B", "accent": "#FF9800", "geometry": "box", "scale": 1.0, "height": 2.5, "position": {"x": 7.5, "y": 1.25, "z": 0.0}, "snippet": "I remember my first day of school. I was nervous but excited.", "date": "2026-07-06 19:02"}, {"index": 1, "emotion": "nostalgia", "objects": ["school", "classroom", "hallway", "backpack"], "spatial": "open", "color": "#AB47BC", "accent": "#7B1FA2", "geometry": "cylinder", "scale": 1.4, "height": 3.1, "position": {"x": -7.82, "y": 1.55, "z": 7.16}, "snippet": "last day of school", "date": "2026-07-06 19:11"}, {"index": 2, "emotion": "nostalgia", "objects": ["school", "classroom", "desk", "lockers"], "spatial": "crowded", "color": "#AB47BC", "accent": "#7B1FA2", "geometry": "cylinder", "scale": 0.7, "height": 2.05, "position": {"x": 1.14, "y": 1.02, "z": -12.94}, "snippet": "my last day of school", "date": "2026-07-06 19:44"}, {"index": 3, "emotion": "nostalgia", "objects": ["school", "classroom", "lockers", "desk"], "spatial": "crowded", "color": "#AB47BC", "accent": "#7B1FA2", "geometry": "cylinder", "scale": 0.7, "height": 2.69, "position": {"x": 9.13, "y": 1.35, "z": 11.9}, "snippet": "last day of school", "date": "2026-07-06 19:55"}, {"index": 4, "emotion": "nostalgia", "objects": ["college", "dorm", "lecture hall"], "spatial": "crowded", "color": "#AB47BC", "accent": "#7B1FA2", "geometry": "box", "scale": 0.7, "height": 7.23, "position": {"x": -16.51, "y": 3.61, "z": -2.92}, "snippet": "last day of college", "date": "2026-07-06 20:08"}, {"index": 5, "emotion": "nostalgia", "objects": ["school", "classroom", "hallway"], "spatial": "crowded", "color": "#AB47BC", "accent": "#7B1FA2", "geometry": "cylinder", "scale": 0.7, "height": 8.99, "position": {"x": 15.5, "y": 4.49, "z": -9.86}, "snippet": "last day of school", "date": "2026-07-06 20:17"}, {"index": 6, "emotion": "nostalgia", "objects": ["calendar", "clock"], "spatial": "neutral", "color": "#AB47BC", "accent": "#F06292", "geometry": "box", "scale": 1.0, "height": 10.18, "position": {"x": -5.15, "y": 5.09, "z": 19.16}, "snippet": "last day of year", "date": "2026-07-06 20:30"}, {"index": 7, "emotion": "neutral", "objects": ["calendar", "date", "month"], "spatial": "neutral", "color": "#B0BEC5", "accent": "#4DD0E1", "geometry": "box", "scale": 1.0, "height": 10.27, "position": {"x": -9.78, "y": 5.13, "z": -18.83}, "snippet": "last day of month", "date": "2026-07-06 20:40"}, {"index": 8, "emotion": "fear", "objects": ["college", "campus", "classroom"], "spatial": "crowded", "color": "#37474F", "accent": "#00E676", "geometry": "box", "scale": 0.7, "height": 42.42, "position": {"x": 21.13, "y": 21.21, "z": 7.72}, "snippet": "my 1st day in college and I am so nervous", "date": "2026-07-06 20:54"}, {"index": 9, "emotion": "joy", "objects": ["clock", "fireworks", "people"], "spatial": "crowded", "color": "#FFEB3B", "accent": "#FF6D00", "geometry": "box", "scale": 0.7, "height": 36.4, "position": {"x": -21.92, "y": 18.2, "z": 9.05}, "snippet": "the new year", "date": "2026-07-06 21:10"}, {"index": 10, "emotion": "joy", "objects": ["Christmas", "tree", "gifts"], "spatial": "bright", "color": "#FFEB3B", "accent": "#FF6D00", "geometry": "box", "scale": 1.1, "height": 57.2, "position": {"x": 10.54, "y": 28.6, "z": -22.53}, "snippet": "we are enjoying Christmas", "date": "2026-07-06 22:10"}];
 
 const scene = new THREE.Scene();
 scene.fog = new THREE.FogExp2(0x070c1e, 0.013);
@@ -225,7 +225,7 @@ scene.add(buildStarLayer(180, 2.6, 0.95, [0xffffff, 0xfff2d6, 0xd8ecff]));
   }
   const groundTex = new THREE.CanvasTexture(gCanvas);
   const ground = new THREE.Mesh(
-    new THREE.CircleGeometry(200, 64),
+    new THREE.CircleGeometry(420, 64),
     new THREE.MeshStandardMaterial({ map: groundTex, color: 0xffffff, roughness: 0.95, metalness: 0.05 })
   );
   ground.rotation.x = -Math.PI / 2;
@@ -829,6 +829,303 @@ BUILDINGS.forEach(b => {
   window.__memoryMotes = { motes, speeds, top: moteTop };
 }
 
+// ============================================================
+// WORLD DRESSING - mountains, a fixed shopping mall landmark, street
+// lamps, a park, a lake, and a ring road with moving cars. All sized off
+// worldEdge so they scale sensibly whether the city has 3 buildings or
+// 300, and placed at fixed angles around the outside of the tower cluster
+// so they never overlap the memory towers themselves.
+// ============================================================
+const worldEdge = Math.max(maxRadius, 20);
+
+// ---- MOUNTAINS: a jagged, low-poly range ringing the whole city, faded
+// into the fog for depth - flat-shaded cones with a lighter snow-cap cone
+// stacked on top of each peak. ----
+function buildMountainRange(radius) {
+  const group = new THREE.Group();
+  const count = 46;
+  for (let i = 0; i < count; i++) {
+    const ang = (i / count) * Math.PI * 2 + Math.random() * 0.12;
+    const dist = radius + Math.random() * radius * 0.5;
+    const peakHeight = 40 + Math.random() * 90;
+    const peakRadius = 18 + Math.random() * 30;
+    const sides = 4 + Math.floor(Math.random() * 2);
+    const rotY = Math.random() * Math.PI;
+
+    const geo = new THREE.ConeGeometry(peakRadius, peakHeight, sides);
+    const mat = new THREE.MeshStandardMaterial({ color: 0x1b2036, flatShading: true, roughness: 1 });
+    const mesh = new THREE.Mesh(geo, mat);
+    mesh.rotation.y = rotY;
+    mesh.position.set(Math.cos(ang) * dist, peakHeight / 2 - 4, Math.sin(ang) * dist);
+    mesh.receiveShadow = true;
+    group.add(mesh);
+
+    const capH = peakHeight * 0.26;
+    const capGeo = new THREE.ConeGeometry(peakRadius * 0.4, capH, sides);
+    const capMat = new THREE.MeshStandardMaterial({ color: 0xd7e3ff, flatShading: true, roughness: 0.9 });
+    const cap = new THREE.Mesh(capGeo, capMat);
+    cap.rotation.y = rotY;
+    cap.position.set(mesh.position.x, peakHeight - capH / 2 - 4, mesh.position.z);
+    group.add(cap);
+  }
+  scene.add(group);
+}
+buildMountainRange(worldEdge * 1.5 + 40);
+
+// ---- SHOPPING MALL: a fixed landmark (not tied to any memory) - a wide
+// glassy box with a baked neon "MALL" marquee sign, entrance canopy, and
+// its own ground glow ring. ----
+function buildShoppingMall(x, z) {
+  const group = new THREE.Group();
+  const width = 16, depth = 9, height = 7;
+
+  const texW = 256, texH = 128;
+  const canvas = document.createElement('canvas');
+  canvas.width = texW; canvas.height = texH;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#0d2436';
+  ctx.fillRect(0, 0, texW, texH);
+  const cols = 12, rows = 4;
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      ctx.fillStyle = Math.random() > 0.25 ? '#7fe3ff' : '#123246';
+      ctx.fillRect(c * (texW / cols) + 2, r * (texH / rows) + 2, texW / cols - 4, texH / rows - 4);
+    }
+  }
+  const facadeTex = new THREE.CanvasTexture(canvas);
+  facadeTex.wrapS = THREE.RepeatWrapping;
+  facadeTex.wrapT = THREE.RepeatWrapping;
+
+  const bodyMat = new THREE.MeshStandardMaterial({
+    map: facadeTex, color: 0xffffff, emissive: 0x2ce0ff, emissiveMap: facadeTex,
+    emissiveIntensity: 0.9, roughness: 0.25, metalness: 0.5,
+  });
+  const body = new THREE.Mesh(new THREE.BoxGeometry(width, height, depth), bodyMat);
+  body.position.y = height / 2;
+  body.castShadow = true;
+  body.receiveShadow = true;
+  group.add(body);
+
+  const signCanvas = document.createElement('canvas');
+  signCanvas.width = 512; signCanvas.height = 128;
+  const sctx = signCanvas.getContext('2d');
+  sctx.fillStyle = '#050b12';
+  sctx.fillRect(0, 0, 512, 128);
+  sctx.font = 'bold 76px sans-serif';
+  sctx.fillStyle = '#ff5fd1';
+  sctx.textAlign = 'center';
+  sctx.textBaseline = 'middle';
+  sctx.shadowColor = '#ff5fd1';
+  sctx.shadowBlur = 30;
+  sctx.fillText('MALL', 256, 68);
+  const signTex = new THREE.CanvasTexture(signCanvas);
+  const signMat = new THREE.MeshBasicMaterial({ map: signTex, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false });
+  const sign = new THREE.Mesh(new THREE.PlaneGeometry(9, 2.2), signMat);
+  sign.position.set(0, height + 1.3, depth / 2 + 0.05);
+  group.add(sign);
+
+  const canopyMat = new THREE.MeshStandardMaterial({ color: 0x0e1720, emissive: 0x2ce0ff, emissiveIntensity: 0.5, transparent: true, opacity: 0.55 });
+  const canopy = new THREE.Mesh(new THREE.BoxGeometry(6, 0.3, 2.4), canopyMat);
+  canopy.position.set(0, 2.6, depth / 2 + 1.3);
+  group.add(canopy);
+
+  const ringMat = new THREE.MeshBasicMaterial({
+    color: 0x2ce0ff, transparent: true, opacity: 0.45,
+    side: THREE.DoubleSide, blending: THREE.AdditiveBlending, depthWrite: false,
+  });
+  const ring = new THREE.Mesh(new THREE.RingGeometry(width * 0.55, width * 0.55 + 1.2, 48), ringMat);
+  ring.rotation.x = -Math.PI / 2;
+  ring.position.y = 0.05;
+  group.add(ring);
+
+  group.position.set(x, 0, z);
+  scene.add(group);
+}
+buildShoppingMall(Math.cos(0.0) * (worldEdge + 14), Math.sin(0.0) * (worldEdge + 14));
+
+// ---- STREET LAMPS: warm little lamp-posts on two rings through the
+// city, each with its own soft point light + glow sprite. ----
+function addStreetLamp(x, z) {
+  const group = new THREE.Group();
+  const poleH = 3.2;
+  const poleMat = new THREE.MeshStandardMaterial({ color: 0x2a2e38, roughness: 0.6, metalness: 0.4 });
+  const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.07, poleH, 8), poleMat);
+  pole.position.y = poleH / 2;
+  pole.castShadow = true;
+  group.add(pole);
+
+  const arm = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.5, 6), poleMat);
+  arm.rotation.z = Math.PI / 2;
+  arm.position.set(0.25, poleH - 0.1, 0);
+  group.add(arm);
+
+  const lampMat = new THREE.MeshStandardMaterial({ color: 0xffdca0, emissive: 0xffc873, emissiveIntensity: 1.6, roughness: 0.3 });
+  const lamp = new THREE.Mesh(new THREE.SphereGeometry(0.14, 10, 8), lampMat);
+  lamp.position.set(0.5, poleH - 0.1, 0);
+  group.add(lamp);
+
+  const light = new THREE.PointLight(0xffc873, 0.55, 6);
+  light.position.copy(lamp.position);
+  group.add(light);
+
+  group.position.set(x, 0, z);
+  scene.add(group);
+  addGlowSprite(new THREE.Vector3(x + lamp.position.x, lamp.position.y, z), 0xffc873, 1.3);
+}
+
+{
+  const lampRings = [worldEdge * 0.4, worldEdge * 0.78];
+  lampRings.forEach((r, ri) => {
+    const count = 10 + ri * 4;
+    for (let i = 0; i < count; i++) {
+      const ang = (i / count) * Math.PI * 2 + ri * 0.3;
+      addStreetLamp(Math.cos(ang) * r, Math.sin(ang) * r);
+    }
+  });
+}
+
+// ---- PARK: a grove of low-poly pine trees on a lawn patch, using
+// InstancedMesh so the whole grove is only two draw calls. ----
+function buildPark(centerX, centerZ, spread, count) {
+  const trunkGeo = new THREE.CylinderGeometry(0.12, 0.16, 1.4, 6);
+  const trunkMat = new THREE.MeshStandardMaterial({ color: 0x4a3524, roughness: 0.9 });
+  const trunkMesh = new THREE.InstancedMesh(trunkGeo, trunkMat, count);
+
+  const canopyGeo = new THREE.ConeGeometry(1.0, 2.2, 7);
+  const canopyMat = new THREE.MeshStandardMaterial({ color: 0x1f4a2e, emissive: 0x0d2415, emissiveIntensity: 0.4, roughness: 0.85, flatShading: true });
+  const canopyMesh = new THREE.InstancedMesh(canopyGeo, canopyMat, count);
+
+  const dummy = new THREE.Object3D();
+  for (let i = 0; i < count; i++) {
+    const ang = Math.random() * Math.PI * 2;
+    const r = Math.sqrt(Math.random()) * spread;
+    const x = centerX + Math.cos(ang) * r;
+    const z = centerZ + Math.sin(ang) * r;
+    const scale = 0.7 + Math.random() * 0.7;
+
+    dummy.position.set(x, 0.7 * scale, z);
+    dummy.scale.set(scale, scale, scale);
+    dummy.rotation.y = Math.random() * Math.PI * 2;
+    dummy.updateMatrix();
+    trunkMesh.setMatrixAt(i, dummy.matrix);
+
+    dummy.position.set(x, (1.4 + 1.1) * scale, z);
+    dummy.updateMatrix();
+    canopyMesh.setMatrixAt(i, dummy.matrix);
+  }
+  trunkMesh.castShadow = true;
+  canopyMesh.castShadow = true;
+  scene.add(trunkMesh);
+  scene.add(canopyMesh);
+
+  const lawn = new THREE.Mesh(
+    new THREE.CircleGeometry(spread + 3, 32),
+    new THREE.MeshStandardMaterial({ color: 0x122a1a, roughness: 1 })
+  );
+  lawn.rotation.x = -Math.PI / 2;
+  lawn.position.set(centerX, 0.01, centerZ);
+  lawn.receiveShadow = true;
+  scene.add(lawn);
+}
+buildPark(Math.cos(2.3) * (worldEdge + 15), Math.sin(2.3) * (worldEdge + 15), 12, 40);
+
+// ---- LAKE: a calm reflective disc with a faint animated ripple (its
+// texture offset drifts slowly every frame, see animate()). ----
+const lakeRippleTexture = (() => {
+  const c = document.createElement('canvas');
+  c.width = 128; c.height = 128;
+  const ctx = c.getContext('2d');
+  ctx.fillStyle = '#0a2a3a';
+  ctx.fillRect(0, 0, 128, 128);
+  ctx.strokeStyle = 'rgba(255,255,255,0.12)';
+  for (let i = 0; i < 10; i++) {
+    ctx.beginPath();
+    ctx.arc(Math.random() * 128, Math.random() * 128, 10 + Math.random() * 30, 0, Math.PI * 2);
+    ctx.stroke();
+  }
+  const tex = new THREE.CanvasTexture(c);
+  tex.wrapS = THREE.RepeatWrapping;
+  tex.wrapT = THREE.RepeatWrapping;
+  tex.repeat.set(4, 4);
+  return tex;
+})();
+
+let lakeMaterial = null;
+function buildLake(x, z, radius) {
+  lakeMaterial = new THREE.MeshStandardMaterial({
+    map: lakeRippleTexture, color: 0x3a7ca8, roughness: 0.15, metalness: 0.6,
+    emissive: 0x0c2636, emissiveIntensity: 0.3,
+  });
+  const lake = new THREE.Mesh(new THREE.CircleGeometry(radius, 48), lakeMaterial);
+  lake.rotation.x = -Math.PI / 2;
+  lake.position.set(x, 0.02, z);
+  lake.receiveShadow = true;
+  scene.add(lake);
+
+  const shore = new THREE.Mesh(
+    new THREE.RingGeometry(radius, radius + 2.4, 48),
+    new THREE.MeshStandardMaterial({ color: 0x1c2718, roughness: 1 })
+  );
+  shore.rotation.x = -Math.PI / 2;
+  shore.position.set(x, 0.015, z);
+  scene.add(shore);
+}
+buildLake(Math.cos(4.4) * (worldEdge + 16), Math.sin(4.4) * (worldEdge + 16), 9);
+
+// ---- RING ROAD + CARS: a loop road around the outside of the tower
+// cluster (past the memory towers, tying the mall/park/lake together),
+// with a handful of little cars continuously driving around it - see
+// animate() for the per-frame movement. ----
+function buildRingRoad(radius) {
+  const roadMat = new THREE.MeshStandardMaterial({ color: 0x1a1c22, roughness: 0.95 });
+  const road = new THREE.Mesh(new THREE.RingGeometry(radius - 1.6, radius + 1.6, 96), roadMat);
+  road.rotation.x = -Math.PI / 2;
+  road.position.y = 0.03;
+  road.receiveShadow = true;
+  scene.add(road);
+
+  const dashMat = new THREE.MeshBasicMaterial({ color: 0xffe9a8, transparent: true, opacity: 0.55 });
+  const dashCount = 90;
+  for (let i = 0; i < dashCount; i++) {
+    if (i % 2 === 0) continue;
+    const ang = (i / dashCount) * Math.PI * 2;
+    const dash = new THREE.Mesh(new THREE.PlaneGeometry(0.9, 0.16), dashMat);
+    dash.rotation.x = -Math.PI / 2;
+    dash.rotation.z = ang + Math.PI / 2;
+    dash.position.set(Math.cos(ang) * radius, 0.04, Math.sin(ang) * radius);
+    scene.add(dash);
+  }
+}
+
+const roadCars = [];
+function addCar(radius, angle, speed, color) {
+  const car = new THREE.Group();
+  const bodyMat = new THREE.MeshStandardMaterial({ color, roughness: 0.4, metalness: 0.5 });
+  const body = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.35, 0.5), bodyMat);
+  body.position.y = 0.25;
+  car.add(body);
+  const cabin = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.24, 0.44), new THREE.MeshStandardMaterial({ color: 0x0c0e14 }));
+  cabin.position.set(-0.05, 0.47, 0);
+  car.add(cabin);
+  const headlight = new THREE.Mesh(new THREE.SphereGeometry(0.06, 6, 6), new THREE.MeshBasicMaterial({ color: 0xfff2c0 }));
+  headlight.position.set(0.46, 0.25, 0);
+  car.add(headlight);
+  const taillight = new THREE.Mesh(new THREE.SphereGeometry(0.06, 6, 6), new THREE.MeshBasicMaterial({ color: 0xff3b3b }));
+  taillight.position.set(-0.46, 0.25, 0);
+  car.add(taillight);
+  scene.add(car);
+  roadCars.push({ car, radius, angle, speed });
+}
+
+const roadRadius = worldEdge + 20;
+buildRingRoad(roadRadius);
+{
+  const carColors = [0xff5b5b, 0x5bb3ff, 0xffd75b, 0x8be36b];
+  for (let i = 0; i < 8; i++) {
+    addCar(roadRadius, (i / 8) * Math.PI * 2, (i % 2 === 0 ? 1 : -1) * (0.08 + Math.random() * 0.05), carColors[i % carColors.length]);
+  }
+}
+
 // Selecting a building boosts its own glow (facade emissive, point light,
 // halo sprite) well above the resting city glow, then reverts the previous
 // selection back to its dim resting state - so only the tapped building
@@ -1024,6 +1321,19 @@ function animate() {
     o.core.rotation.y += 0.01;
     o.shell.rotation.y -= 0.006;
     o.shell.rotation.x += 0.004;
+  }
+
+  // Lake surface ripple drifts slowly, and each car advances along the
+  // ring road, facing the direction it's currently driving.
+  if (lakeMaterial) {
+    lakeMaterial.map.offset.x += 0.0006;
+    lakeMaterial.map.offset.y += 0.0003;
+  }
+  for (let i = 0; i < roadCars.length; i++) {
+    const rc = roadCars[i];
+    rc.angle += rc.speed * 0.01;
+    rc.car.position.set(Math.cos(rc.angle) * rc.radius, 0, Math.sin(rc.angle) * rc.radius);
+    rc.car.rotation.y = -rc.angle + (rc.speed > 0 ? Math.PI / 2 : -Math.PI / 2);
   }
 
   renderer.render(scene, camera);
