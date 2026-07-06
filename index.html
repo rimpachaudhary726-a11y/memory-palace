@@ -838,17 +838,17 @@ BUILDINGS.forEach(b => {
 // ============================================================
 const worldEdge = Math.max(maxRadius, 20);
 
-// ---- MOUNTAINS: a jagged, low-poly range ringing the whole city, faded
-// into the fog for depth - flat-shaded cones with a lighter snow-cap cone
-// stacked on top of each peak. ----
-function buildMountainRange(radius) {
+// ---- MOUNTAINS: a jagged, low-poly range on ONE side of the city only
+// (behind the waterfall/lake), pushed well out into the fog so they read
+// as a distant backdrop instead of a close ring that clips into the
+// scene - flat-shaded cones with a lighter snow-cap cone on each peak. ----
+function buildMountainRange(radius, centerAngle, arcSpread, count) {
   const group = new THREE.Group();
-  const count = 46;
   for (let i = 0; i < count; i++) {
-    const ang = (i / count) * Math.PI * 2 + Math.random() * 0.12;
-    const dist = radius + Math.random() * radius * 0.5;
-    const peakHeight = 40 + Math.random() * 90;
-    const peakRadius = 18 + Math.random() * 30;
+    const ang = centerAngle + (Math.random() - 0.5) * arcSpread;
+    const dist = radius + Math.random() * radius * 0.35;
+    const peakHeight = 50 + Math.random() * 90;
+    const peakRadius = 20 + Math.random() * 32;
     const sides = 4 + Math.floor(Math.random() * 2);
     const rotY = Math.random() * Math.PI;
 
@@ -870,7 +870,11 @@ function buildMountainRange(radius) {
   }
   scene.add(group);
 }
-buildMountainRange(worldEdge * 1.5 + 40);
+// A fixed minimum distance (not just worldEdge-scaled) keeps them far away
+// even for a small city with only a handful of buildings - centered on the
+// same angle as the waterfall/lake (4.4) with a 55-degree-wide arc, so
+// they form one distant backdrop instead of surrounding the whole scene.
+buildMountainRange(Math.max(worldEdge * 1.8, 160) + 90, 4.4, Math.PI * 0.3, 20);
 
 // ---- SHOPPING MALL: a fixed landmark (not tied to any memory) - a wide
 // glassy box with a baked neon "MALL" marquee sign, entrance canopy, and
@@ -1071,6 +1075,93 @@ function buildLake(x, z, radius) {
   scene.add(shore);
 }
 buildLake(Math.cos(4.4) * (worldEdge + 16), Math.sin(4.4) * (worldEdge + 16), 9);
+
+// ---- WATERFALL: a rock cliff just behind the lake, with water cascading
+// down its face and a small road bridge (with guardrail) crossing right
+// at its base - the mountain/waterfall/lake/road composition from the
+// reference photo. Built facing the origin via lookAt() so the falls
+// always pour toward the lake regardless of which angle they're placed at. ----
+const waterfallMaterials = [];
+function buildWaterfall(x, z, cliffHeight) {
+  const group = new THREE.Group();
+
+  const cliffMat = new THREE.MeshStandardMaterial({ color: 0x2b2f38, roughness: 1, flatShading: true });
+  const cliff = new THREE.Mesh(new THREE.ConeGeometry(22, cliffHeight, 5), cliffMat);
+  cliff.position.y = cliffHeight / 2 - 3;
+  cliff.receiveShadow = true;
+  group.add(cliff);
+
+  const capMat = new THREE.MeshStandardMaterial({ color: 0x24422b, roughness: 0.9, flatShading: true });
+  const cap = new THREE.Mesh(new THREE.ConeGeometry(9, cliffHeight * 0.22, 5), capMat);
+  cap.position.y = cliffHeight - 3 - cliffHeight * 0.11;
+  group.add(cap);
+
+  // Falling water - vertical white streaks tiled and scrolled downward
+  // every frame (see animate()), on a plane facing the lake.
+  const fallTex = (() => {
+    const c = document.createElement('canvas');
+    c.width = 32; c.height = 256;
+    const ctx = c.getContext('2d');
+    ctx.clearRect(0, 0, 32, 256);
+    for (let i = 0; i < 40; i++) {
+      const px = Math.random() * 32;
+      const segH = 20 + Math.random() * 80;
+      const y = Math.random() * 256;
+      const grad = ctx.createLinearGradient(0, y, 0, y + segH);
+      grad.addColorStop(0, 'rgba(255,255,255,0)');
+      grad.addColorStop(0.5, 'rgba(255,255,255,0.85)');
+      grad.addColorStop(1, 'rgba(255,255,255,0)');
+      ctx.fillStyle = grad;
+      ctx.fillRect(px, y, 1.4 + Math.random() * 1.6, segH);
+    }
+    const t = new THREE.CanvasTexture(c);
+    t.wrapS = THREE.RepeatWrapping;
+    t.wrapT = THREE.RepeatWrapping;
+    t.repeat.set(4, 3);
+    return t;
+  })();
+  const fallMat = new THREE.MeshBasicMaterial({
+    map: fallTex, color: 0xdff3ff, transparent: true, opacity: 0.85,
+    blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide,
+  });
+  const fallHeight = cliffHeight * 0.85;
+  const fall = new THREE.Mesh(new THREE.PlaneGeometry(7, fallHeight), fallMat);
+  fall.position.set(0, fallHeight / 2 - 2, -15.5);
+  group.add(fall);
+  waterfallMaterials.push(fallMat);
+
+  // Mist/spray glow where the falls hit the base.
+  const mistMat = new THREE.SpriteMaterial({
+    map: glowTexture, color: 0xcdeeff, transparent: true, opacity: 0.6,
+    depthWrite: false, blending: THREE.AdditiveBlending,
+  });
+  const mist = new THREE.Sprite(mistMat);
+  mist.position.set(0, 0.6, -15.5);
+  mist.scale.set(6, 6, 1);
+  group.add(mist);
+
+  // Small road bridge with guardrail crossing right at the base of the
+  // falls, echoing the road-hugging-the-waterfall shot in the reference.
+  const bridgeMat = new THREE.MeshStandardMaterial({ color: 0x2a2c30, roughness: 0.9 });
+  const bridge = new THREE.Mesh(new THREE.BoxGeometry(14, 0.25, 3), bridgeMat);
+  bridge.position.set(0, 0.15, -19);
+  group.add(bridge);
+
+  const railMat = new THREE.MeshStandardMaterial({ color: 0x15161a, roughness: 0.6, metalness: 0.5 });
+  for (let i = -6; i <= 6; i += 2) {
+    const post = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 0.7, 6), railMat);
+    post.position.set(i, 0.6, -17.6);
+    group.add(post);
+  }
+  const railBar = new THREE.Mesh(new THREE.BoxGeometry(13, 0.06, 0.06), railMat);
+  railBar.position.set(0, 0.9, -17.6);
+  group.add(railBar);
+
+  group.position.set(x, 0, z);
+  group.lookAt(0, 0, 0);
+  scene.add(group);
+}
+buildWaterfall(Math.cos(4.4) * (worldEdge + 42), Math.sin(4.4) * (worldEdge + 42), 70);
 
 // ---- RING ROAD + CARS: a loop road around the outside of the tower
 // cluster (past the memory towers, tying the mall/park/lake together),
@@ -1328,6 +1419,10 @@ function animate() {
   if (lakeMaterial) {
     lakeMaterial.map.offset.x += 0.0006;
     lakeMaterial.map.offset.y += 0.0003;
+  }
+  // Waterfall streaks continuously slide down the cliff face.
+  for (let i = 0; i < waterfallMaterials.length; i++) {
+    waterfallMaterials[i].map.offset.y -= 0.02;
   }
   for (let i = 0; i < roadCars.length; i++) {
     const rc = roadCars[i];
