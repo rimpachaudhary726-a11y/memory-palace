@@ -27,7 +27,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 </head>
 <body>
-<div id="hint">drag to orbit - scroll to zoom - tap a building to fly to its memory - tap empty space to reset view</div>
+<div id="hint">drag to orbit - scroll or pinch to zoom - tap a building to fly to its memory - tap empty space to reset view</div>
 <div id="status">loading Three.js...</div>
 <div id="label"></div>
 <script>
@@ -40,7 +40,7 @@ window.addEventListener('error', function(e) {
 });
 
 try {
-const BUILDINGS = [{"index": 0, "emotion": "joy", "objects": [], "spatial": "neutral", "color": "#FFEB3B", "accent": "#FF9800", "geometry": "box", "scale": 1.0, "height": 2.5, "position": {"x": 3.2, "y": 1.25, "z": 0.0}, "snippet": "I remember my first day of school. I was nervous but excited.", "date": "2026-07-06 19:02"}, {"index": 1, "emotion": "nostalgia", "objects": ["school", "classroom", "hallway", "backpack"], "spatial": "open", "color": "#AB47BC", "accent": "#7B1FA2", "geometry": "cylinder", "scale": 1.4, "height": 3.1, "position": {"x": -3.34, "y": 1.55, "z": 3.06}, "snippet": "last day of school", "date": "2026-07-06 19:11"}, {"index": 2, "emotion": "nostalgia", "objects": ["school", "classroom", "desk", "lockers"], "spatial": "crowded", "color": "#AB47BC", "accent": "#7B1FA2", "geometry": "cylinder", "scale": 0.7, "height": 2.05, "position": {"x": 0.48, "y": 1.02, "z": -5.52}, "snippet": "my last day of school", "date": "2026-07-06 19:44"}, {"index": 3, "emotion": "nostalgia", "objects": ["school", "classroom", "lockers", "desk"], "spatial": "crowded", "color": "#AB47BC", "accent": "#7B1FA2", "geometry": "cylinder", "scale": 0.7, "height": 2.69, "position": {"x": 3.89, "y": 1.35, "z": 5.08}, "snippet": "last day of school", "date": "2026-07-06 19:55"}, {"index": 4, "emotion": "nostalgia", "objects": ["college", "dorm", "lecture hall"], "spatial": "crowded", "color": "#AB47BC", "accent": "#7B1FA2", "geometry": "box", "scale": 0.7, "height": 7.23, "position": {"x": -7.05, "y": 3.61, "z": -1.25}, "snippet": "last day of college", "date": "2026-07-06 20:08"}, {"index": 5, "emotion": "nostalgia", "objects": ["school", "classroom", "hallway"], "spatial": "crowded", "color": "#AB47BC", "accent": "#7B1FA2", "geometry": "cylinder", "scale": 0.7, "height": 8.99, "position": {"x": 6.61, "y": 4.49, "z": -4.21}, "snippet": "last day of school", "date": "2026-07-06 20:17"}, {"index": 6, "emotion": "nostalgia", "objects": ["calendar", "clock"], "spatial": "neutral", "color": "#AB47BC", "accent": "#F06292", "geometry": "box", "scale": 1.0, "height": 10.18, "position": {"x": -2.2, "y": 5.09, "z": 8.18}, "snippet": "last day of year", "date": "2026-07-06 20:30"}, {"index": 7, "emotion": "neutral", "objects": ["calendar", "date", "month"], "spatial": "neutral", "color": "#B0BEC5", "accent": "#4DD0E1", "geometry": "box", "scale": 1.0, "height": 10.27, "position": {"x": -4.17, "y": 5.13, "z": -8.03}, "snippet": "last day of month", "date": "2026-07-06 20:40"}, {"index": 8, "emotion": "fear", "objects": ["college", "campus", "classroom"], "spatial": "crowded", "color": "#37474F", "accent": "#00E676", "geometry": "box", "scale": 0.7, "height": 42.42, "position": {"x": 9.02, "y": 21.21, "z": 3.29}, "snippet": "my 1st day in college and I am so nervous", "date": "2026-07-06 20:54"}];
+const BUILDINGS = [{"index": 0, "emotion": "joy", "objects": [], "spatial": "neutral", "color": "#FFEB3B", "accent": "#FF9800", "geometry": "box", "scale": 1.0, "height": 2.5, "position": {"x": 3.2, "y": 1.25, "z": 0.0}, "snippet": "I remember my first day of school. I was nervous but excited.", "date": "2026-07-06 19:02"}, {"index": 1, "emotion": "nostalgia", "objects": ["school", "classroom", "hallway", "backpack"], "spatial": "open", "color": "#AB47BC", "accent": "#7B1FA2", "geometry": "cylinder", "scale": 1.4, "height": 3.1, "position": {"x": -3.34, "y": 1.55, "z": 3.06}, "snippet": "last day of school", "date": "2026-07-06 19:11"}, {"index": 2, "emotion": "nostalgia", "objects": ["school", "classroom", "desk", "lockers"], "spatial": "crowded", "color": "#AB47BC", "accent": "#7B1FA2", "geometry": "cylinder", "scale": 0.7, "height": 2.05, "position": {"x": 0.48, "y": 1.02, "z": -5.52}, "snippet": "my last day of school", "date": "2026-07-06 19:44"}, {"index": 3, "emotion": "nostalgia", "objects": ["school", "classroom", "lockers", "desk"], "spatial": "crowded", "color": "#AB47BC", "accent": "#7B1FA2", "geometry": "cylinder", "scale": 0.7, "height": 2.69, "position": {"x": 3.89, "y": 1.35, "z": 5.08}, "snippet": "last day of school", "date": "2026-07-06 19:55"}, {"index": 4, "emotion": "nostalgia", "objects": ["college", "dorm", "lecture hall"], "spatial": "crowded", "color": "#AB47BC", "accent": "#7B1FA2", "geometry": "box", "scale": 0.7, "height": 7.23, "position": {"x": -7.05, "y": 3.61, "z": -1.25}, "snippet": "last day of college", "date": "2026-07-06 20:08"}, {"index": 5, "emotion": "nostalgia", "objects": ["school", "classroom", "hallway"], "spatial": "crowded", "color": "#AB47BC", "accent": "#7B1FA2", "geometry": "cylinder", "scale": 0.7, "height": 8.99, "position": {"x": 6.61, "y": 4.49, "z": -4.21}, "snippet": "last day of school", "date": "2026-07-06 20:17"}, {"index": 6, "emotion": "nostalgia", "objects": ["calendar", "clock"], "spatial": "neutral", "color": "#AB47BC", "accent": "#F06292", "geometry": "box", "scale": 1.0, "height": 10.18, "position": {"x": -2.2, "y": 5.09, "z": 8.18}, "snippet": "last day of year", "date": "2026-07-06 20:30"}, {"index": 7, "emotion": "neutral", "objects": ["calendar", "date", "month"], "spatial": "neutral", "color": "#B0BEC5", "accent": "#4DD0E1", "geometry": "box", "scale": 1.0, "height": 10.27, "position": {"x": -4.17, "y": 5.13, "z": -8.03}, "snippet": "last day of month", "date": "2026-07-06 20:40"}, {"index": 8, "emotion": "fear", "objects": ["college", "campus", "classroom"], "spatial": "crowded", "color": "#37474F", "accent": "#00E676", "geometry": "box", "scale": 0.7, "height": 42.42, "position": {"x": 9.02, "y": 21.21, "z": 3.29}, "snippet": "my 1st day in college and I am so nervous", "date": "2026-07-06 20:54"}, {"index": 9, "emotion": "joy", "objects": ["clock", "fireworks", "people"], "spatial": "crowded", "color": "#FFEB3B", "accent": "#FF6D00", "geometry": "box", "scale": 0.7, "height": 36.4, "position": {"x": -9.35, "y": 18.2, "z": 3.86}, "snippet": "the new year", "date": "2026-07-06 21:10"}];
 
 const scene = new THREE.Scene();
 scene.fog = new THREE.FogExp2(0x070c1e, 0.013);
@@ -53,24 +53,55 @@ renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 document.body.appendChild(renderer.domElement);
 
-// Night sky dome - deep blue-black with a faint city-glow band near the
-// horizon (like real light pollution over a skyline). Also reused as
-// scene.environment so glass windows and metallic trim have something real
-// to reflect instead of rendering flat/dark.
+// Night sky dome - a richer gradient with a visible glowing moon, painted
+// onto one equirectangular canvas (also reused as scene.environment so
+// windows/metal trim have something real to reflect instead of flat black).
 let nightSkyTex;
 {
+  const skyW = 512, skyH = 256;
   const skyCanvas = document.createElement('canvas');
-  skyCanvas.width = 2; skyCanvas.height = 256;
+  skyCanvas.width = skyW; skyCanvas.height = skyH;
   const ctx = skyCanvas.getContext('2d');
-  const grad = ctx.createLinearGradient(0, 0, 0, 256);
-  grad.addColorStop(0, '#02040c');
-  grad.addColorStop(0.55, '#060a1c');
-  grad.addColorStop(0.82, '#12224a');
+
+  // Vertical gradient: bright zenith blue fading through a lit horizon
+  // band (city glow) down to the ground - noticeably more color than a
+  // near-black void.
+  const grad = ctx.createLinearGradient(0, 0, 0, skyH);
+  grad.addColorStop(0, '#050b1f');
+  grad.addColorStop(0.45, '#0a1638');
+  grad.addColorStop(0.72, '#1b3468');
+  grad.addColorStop(0.88, '#2c4d86');
   grad.addColorStop(1, '#0a1230');
   ctx.fillStyle = grad;
-  ctx.fillRect(0, 0, 2, 256);
+  ctx.fillRect(0, 0, skyW, skyH);
+
+  // Soft glowing moon
+  const moonX = skyW * 0.74, moonY = skyH * 0.22, moonR = 16;
+  const moonGlow = ctx.createRadialGradient(moonX, moonY, 0, moonX, moonY, moonR * 5);
+  moonGlow.addColorStop(0, 'rgba(226,238,255,0.55)');
+  moonGlow.addColorStop(0.3, 'rgba(200,220,255,0.18)');
+  moonGlow.addColorStop(1, 'rgba(200,220,255,0)');
+  ctx.fillStyle = moonGlow;
+  ctx.fillRect(0, 0, skyW, skyH);
+  ctx.beginPath();
+  ctx.arc(moonX, moonY, moonR, 0, Math.PI * 2);
+  ctx.fillStyle = '#eef4ff';
+  ctx.fill();
+
+  // A few soft cloud smudges for depth
+  ctx.globalAlpha = 0.06;
+  ctx.fillStyle = '#ffffff';
+  for (let i = 0; i < 10; i++) {
+    const cx = Math.random() * skyW, cy = skyH * (0.3 + Math.random() * 0.35);
+    const rw = 40 + Math.random() * 60;
+    ctx.beginPath();
+    ctx.ellipse(cx, cy, rw, rw * 0.25, 0, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.globalAlpha = 1;
+
   nightSkyTex = new THREE.CanvasTexture(skyCanvas);
-  const skyGeo = new THREE.SphereGeometry(900, 16, 16);
+  const skyGeo = new THREE.SphereGeometry(900, 32, 32);
   const skyMat = new THREE.MeshBasicMaterial({ map: nightSkyTex, side: THREE.BackSide, fog: false });
   scene.add(new THREE.Mesh(skyGeo, skyMat));
 
@@ -135,7 +166,7 @@ scene.add(sun);
 // Starfield - small white points scattered on a big sphere, purely
 // cosmetic, gives the night-city atmosphere Git City has.
 {
-  const starCount = 600;
+  const starCount = 900;
   const starPositions = new Float32Array(starCount * 3);
   for (let i = 0; i < starCount; i++) {
     const r = 300 + Math.random() * 300;
@@ -147,7 +178,7 @@ scene.add(sun);
   }
   const starGeo = new THREE.BufferGeometry();
   starGeo.setAttribute('position', new THREE.BufferAttribute(starPositions, 3));
-  const starMat = new THREE.PointsMaterial({ color: 0xffffff, size: 1.3, sizeAttenuation: true, transparent: true, opacity: 0.8 });
+  const starMat = new THREE.PointsMaterial({ color: 0xffffff, size: 1.6, sizeAttenuation: true, transparent: true, opacity: 0.9 });
   scene.add(new THREE.Points(starGeo, starMat));
 }
 
@@ -185,13 +216,13 @@ function makeGeometry(key, s, h) {
   switch (key) {
     case 'sphere': return new THREE.SphereGeometry(1.15*s, 20, 16);
     case 'torusKnot': return new THREE.TorusKnotGeometry(0.75*s, 0.3*s, 100, 16);
-    case 'cylinder': return new THREE.CylinderGeometry(0.78*s, 0.78*s, h, 20);
+    case 'cylinder': return new THREE.CylinderGeometry(0.98*s, 0.98*s, h, 20);
     case 'dodecahedron': return new THREE.DodecahedronGeometry(1.15*s);
     case 'icosahedron': return new THREE.IcosahedronGeometry(1.15*s);
     case 'cone': return new THREE.ConeGeometry(1.1*s, h, 20);
-    // Slimmer footprint than before (1.5 instead of 2.1) - tall + narrow
-    // reads as a real tower instead of a squat block.
-    default: return new THREE.BoxGeometry(1.5*s, h, 1.5*s);
+    // Wider than the previous pass (1.9 instead of 1.5) - still a tower,
+    // not a squat block, but no longer a needle-thin pole.
+    default: return new THREE.BoxGeometry(1.9*s, h, 1.9*s);
   }
 }
 
@@ -222,7 +253,7 @@ function buildFacadeTexture(accentHex, h) {
   // Row count scales with the building's real height so windows stay
   // roughly floor-sized instead of stretching thin on tall towers.
   const rows = Math.max(14, Math.min(90, Math.round((h || 12) * 2.4)));
-  const cols = 8;
+  const cols = 9;
   const cellW = texW / cols, cellH = texH / rows;
 
   // faint horizontal floor divider lines
@@ -238,22 +269,24 @@ function buildFacadeTexture(accentHex, h) {
   for (let r = 0; r < rows; r++) {
     const isBand = bandRows.has(r);
     for (let c = 0; c < cols; c++) {
-      const pad = cellW * 0.24;
-      const x = c * cellW + pad, y = r * cellH + cellH * 0.22;
-      const wsz = cellW - 2 * pad, hsz = cellH * 0.56;
+      // Tighter padding than before - windows sit closer together as
+      // near-solid blocks, closer to Git City's blocky pixel-grid facades
+      // instead of small isolated dots with a lot of dark gap around them.
+      const pad = cellW * 0.1;
+      const x = c * cellW + pad, y = r * cellH + cellH * 0.12;
+      const wsz = cellW - 2 * pad, hsz = cellH * 0.76;
       if (isBand) {
         ctx.globalAlpha = 0.85;
         ctx.fillStyle = accentHex;
       } else {
-        // Mostly dark glass at rest, a modest fraction lit warm gold with
-        // an occasional cool cyan window mixed in - a calmer, more varied
-        // look than the old mostly-lit blue-white grid.
+        // Roughly half the windows lit at rest - a livelier, more
+        // Git-City-like twinkling skyline instead of a mostly-dark one.
         const roll = Math.random();
-        if (roll > 0.82) {
+        if (roll > 0.62) {
           ctx.globalAlpha = 0.9;
           ctx.fillStyle = '#ffce6b';
-        } else if (roll > 0.74) {
-          ctx.globalAlpha = 0.8;
+        } else if (roll > 0.48) {
+          ctx.globalAlpha = 0.85;
           ctx.fillStyle = '#8fd8ff';
         } else {
           ctx.globalAlpha = 0.9;
@@ -278,6 +311,12 @@ function buildFacadeTexture(accentHex, h) {
   const tex = new THREE.CanvasTexture(canvas);
   tex.wrapS = THREE.RepeatWrapping;
   tex.wrapT = THREE.RepeatWrapping;
+  // Nearest filtering keeps window edges crisp and blocky (Git City's
+  // pixel-art look) instead of the soft blur mipmapping/bilinear filtering
+  // gives by default, which was flattening the grid into a smear from
+  // any distance.
+  tex.magFilter = THREE.NearestFilter;
+  tex.minFilter = THREE.NearestFilter;
   return tex;
 }
 
@@ -287,8 +326,8 @@ function buildFacadeTexture(accentHex, h) {
 function addRoofDetails(parent, key, plinthScale, capScale, h, accentColor) {
   if (key === 'box' || key === 'cylinder') {
     const capGeo = key === 'box'
-      ? new THREE.BoxGeometry(1.5 * capScale * 1.1, 0.18, 1.5 * capScale * 1.1)
-      : new THREE.CylinderGeometry(0.78 * capScale * 1.12, 0.78 * capScale * 1.12, 0.18, 20);
+      ? new THREE.BoxGeometry(1.9 * capScale * 1.1, 0.18, 1.9 * capScale * 1.1)
+      : new THREE.CylinderGeometry(0.98 * capScale * 1.12, 0.98 * capScale * 1.12, 0.18, 20);
     const capMat = new THREE.MeshStandardMaterial({
       color: new THREE.Color(accentColor), emissive: new THREE.Color(accentColor),
       emissiveIntensity: 0.5, roughness: 0.4, metalness: 0.5,
@@ -323,13 +362,50 @@ function addRoofDetails(parent, key, plinthScale, capScale, h, accentColor) {
     }
   }
 
-  const plinthGeo = new THREE.CylinderGeometry(1.0 * plinthScale + 0.3, 1.1 * plinthScale + 0.4, 0.22, 24);
+  const plinthGeo = new THREE.CylinderGeometry(1.27 * plinthScale + 0.3, 1.4 * plinthScale + 0.4, 0.22, 24);
   const plinthMat = new THREE.MeshStandardMaterial({ color: 0x14141c, roughness: 0.9 });
   const plinth = new THREE.Mesh(plinthGeo, plinthMat);
   plinth.position.y = -h / 2 - 0.1;
   plinth.receiveShadow = true;
   plinth.castShadow = true;
   parent.add(plinth);
+
+  addRooftopBeam(parent, capScale, h, accentColor);
+  addGroundRing(parent, plinthScale, h, accentColor);
+}
+
+// The vertical "searchlight" shooting up from a rooftop into the sky - the
+// signature Git City effect. Taller (deeper-memory) buildings get a
+// taller, slightly brighter beam, so the effect itself carries meaning
+// instead of being purely decorative.
+function addRooftopBeam(parent, capScale, h, accentColor) {
+  const beamHeight = Math.max(24, h * 1.6);
+  const beamGeo = new THREE.CylinderGeometry(0.1 * capScale + 0.04, 0.16 * capScale + 0.06, beamHeight, 10, 1, true);
+  const beamMat = new THREE.MeshBasicMaterial({
+    map: beamTexture, color: new THREE.Color(accentColor),
+    transparent: true, opacity: 0.55, depthWrite: false,
+    blending: THREE.AdditiveBlending, side: THREE.DoubleSide,
+  });
+  const beam = new THREE.Mesh(beamGeo, beamMat);
+  beam.position.y = h / 2 + beamHeight / 2 + 0.15;
+  parent.add(beam);
+  return beam;
+}
+
+// Flat glowing ring on the ground around the building's base - the
+// "landing pad" halo visible around towers in the Git City screenshots.
+function addGroundRing(parent, plinthScale, h, accentColor) {
+  const inner = 1.55 * plinthScale + 0.55;
+  const ringGeo = new THREE.RingGeometry(inner, inner + 0.16, 40);
+  const ringMat = new THREE.MeshBasicMaterial({
+    color: new THREE.Color(accentColor), transparent: true, opacity: 0.5,
+    side: THREE.DoubleSide, blending: THREE.AdditiveBlending, depthWrite: false,
+  });
+  const ring = new THREE.Mesh(ringGeo, ringMat);
+  ring.rotation.x = -Math.PI / 2;
+  ring.position.y = -h / 2 - 0.09;
+  parent.add(ring);
+  return ring;
 }
 
 // Soft additive glow sprite - cheap stand-in for real bloom postprocessing
@@ -345,6 +421,22 @@ const glowTexture = (() => {
   g.addColorStop(1, 'rgba(255,255,255,0)');
   ctx.fillStyle = g;
   ctx.fillRect(0, 0, 128, 128);
+  return new THREE.CanvasTexture(c);
+})();
+
+// Vertical fade texture for the rooftop light beams - the "searchlight
+// shooting into the sky" effect from the Git City reference screenshots.
+// Solid near the roof, fading to nothing higher up.
+const beamTexture = (() => {
+  const c = document.createElement('canvas');
+  c.width = 8; c.height = 256;
+  const ctx = c.getContext('2d');
+  const g = ctx.createLinearGradient(0, 256, 0, 0);
+  g.addColorStop(0, 'rgba(255,255,255,0.95)');
+  g.addColorStop(0.5, 'rgba(255,255,255,0.35)');
+  g.addColorStop(1, 'rgba(255,255,255,0)');
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, 8, 256);
   return new THREE.CanvasTexture(c);
 })();
 
@@ -404,10 +496,10 @@ function buildBuildingGroup(b, h) {
     const tierScale = s * Math.pow(widthFactor, i);
     topScale = tierScale;
     const geo = key === 'box'
-      ? new THREE.BoxGeometry(1.5 * tierScale, tierH, 1.5 * tierScale)
-      : new THREE.CylinderGeometry(0.78 * tierScale, 0.78 * tierScale, tierH, 20);
+      ? new THREE.BoxGeometry(1.9 * tierScale, tierH, 1.9 * tierScale)
+      : new THREE.CylinderGeometry(0.98 * tierScale, 0.98 * tierScale, tierH, 20);
     const mat = new THREE.MeshStandardMaterial({
-      map: tex, color: 0xffffff, emissive: new THREE.Color(accent), emissiveIntensity: 0.12,
+      map: tex, color: 0xffffff, emissive: new THREE.Color(accent), emissiveIntensity: 0.16,
       metalness: 0.25, roughness: 0.5, envMapIntensity: 0.8,
     });
     materials.push(mat);
@@ -449,12 +541,12 @@ BUILDINGS.forEach(b => {
   // Small glowing marker light per building - kept subtle at rest (sqrt of
   // height, not linear) so tall towers don't turn into blown-out light
   // bulbs; a tapped building still pops via applyHighlight() below.
-  const baseLightIntensity = 0.28;
-  const glow = new THREE.PointLight(new THREE.Color(b.accent), baseLightIntensity, 7);
+  const baseLightIntensity = 0.42;
+  const glow = new THREE.PointLight(new THREE.Color(b.accent), baseLightIntensity, 8);
   glow.position.set(b.position.x, b.position.y + h * 0.3, b.position.z);
   scene.add(glow);
-  const baseSpriteScale = Math.max(1.6, Math.sqrt(h) * 1.15);
-  const baseSpriteOpacity = 0.28;
+  const baseSpriteScale = Math.max(1.8, Math.sqrt(h) * 1.25);
+  const baseSpriteOpacity = 0.4;
   const sprite = addGlowSprite(glow.position, b.accent, baseSpriteScale);
 
   buildingRegistry[b.index] = {
@@ -486,7 +578,7 @@ function clearHighlight(idx) {
 function applyHighlight(idx) {
   const reg = buildingRegistry[idx];
   if (!reg) return;
-  reg.materials.forEach((m, i) => { m.emissiveIntensity = reg.baseEmissive[i] + 0.75; });
+  reg.materials.forEach((m, i) => { m.emissiveIntensity = reg.baseEmissive[i] + 0.3; });
   reg.light.intensity = reg.baseLightIntensity * 4.0;
   reg.sprite.material.opacity = 0.85;
   reg.sprite.scale.set(reg.baseSpriteScale * 1.5, reg.baseSpriteScale * 1.5, 1);
@@ -527,20 +619,60 @@ function handlePick(clientX, clientY) {
 
 let isDragging = false, dragMoved = false, lastX = 0, lastY = 0;
 
-// touch-action: none stops the mobile browser from intercepting drag
-// gestures for its own scroll/refresh handling, which is what was causing
-// the "go-stop-go-stop" stutter - without this, touchmove events arrive in
-// uneven throttled bursts instead of a smooth stream.
+// Tracks every finger currently down, keyed by pointerId, so we can tell a
+// one-finger drag (orbit) apart from a two-finger pinch (zoom). The old
+// code only ever remembered a single lastX/lastY, so a second finger
+// touching down just stomped on the first one's tracking and there was no
+// way to zoom on a touchscreen at all - wheel only fires for a mouse.
+const activePointers = new Map();
+let pinchStartDist = null;
+
+function pointerDistance() {
+  const pts = Array.from(activePointers.values());
+  if (pts.length < 2) return null;
+  const dx = pts[0].x - pts[1].x;
+  const dy = pts[0].y - pts[1].y;
+  return Math.hypot(dx, dy);
+}
+
+// touch-action: none stops the mobile browser from intercepting drag/pinch
+// gestures for its own scroll/refresh/zoom handling, which is what was
+// causing the "go-stop-go-stop" stutter and also blocks our own pinch
+// handling below - without this, touchmove events arrive in uneven
+// throttled bursts instead of a smooth stream.
 renderer.domElement.style.touchAction = 'none';
 
 renderer.domElement.addEventListener('pointerdown', (e) => {
-  isDragging = true;
-  dragMoved = false;
-  lastX = e.clientX;
-  lastY = e.clientY;
+  activePointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+  if (activePointers.size === 1) {
+    isDragging = true;
+    dragMoved = false;
+    lastX = e.clientX;
+    lastY = e.clientY;
+  } else {
+    // A second finger just landed - switch out of single-finger orbit
+    // mode and start tracking pinch distance instead.
+    isDragging = false;
+    pinchStartDist = pointerDistance();
+  }
 });
 
 renderer.domElement.addEventListener('pointermove', (e) => {
+  if (!activePointers.has(e.pointerId)) return;
+  activePointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+
+  if (activePointers.size >= 2) {
+    const dist = pointerDistance();
+    if (pinchStartDist !== null && dist !== null) {
+      const delta = dist - pinchStartDist;
+      // Fingers spreading apart (delta > 0) should zoom IN, so it
+      // subtracts from camera distance.
+      camDistanceGoal = Math.max(6, Math.min(320, camDistanceGoal - delta * 0.09));
+    }
+    pinchStartDist = dist;
+    return;
+  }
+
   if (!isDragging) return;
   const dx = e.clientX - lastX;
   const dy = e.clientY - lastY;
@@ -552,10 +684,30 @@ renderer.domElement.addEventListener('pointermove', (e) => {
   lastY = e.clientY;
 });
 
-renderer.domElement.addEventListener('pointerup', (e) => {
-  isDragging = false;
-  if (!dragMoved) handlePick(e.clientX, e.clientY);
-});
+function releasePointer(e) {
+  activePointers.delete(e.pointerId);
+  if (activePointers.size >= 2) {
+    // Still pinching with the remaining fingers - just re-anchor.
+    pinchStartDist = pointerDistance();
+    isDragging = false;
+  } else if (activePointers.size === 1) {
+    // Dropped from two fingers to one - resume orbiting from here instead
+    // of jumping, using whichever finger is still down.
+    const remaining = Array.from(activePointers.values())[0];
+    lastX = remaining.x;
+    lastY = remaining.y;
+    isDragging = true;
+    dragMoved = true; // avoid firing a tap-select right after a pinch
+    pinchStartDist = null;
+  } else {
+    pinchStartDist = null;
+    if (isDragging && !dragMoved) handlePick(e.clientX, e.clientY);
+    isDragging = false;
+  }
+}
+
+renderer.domElement.addEventListener('pointerup', releasePointer);
+renderer.domElement.addEventListener('pointercancel', releasePointer);
 
 renderer.domElement.addEventListener('wheel', (e) => {
   camDistanceGoal = Math.max(6, Math.min(320, camDistanceGoal + e.deltaY * 0.03));
