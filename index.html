@@ -40,7 +40,7 @@ window.addEventListener('error', function(e) {
 });
 
 try {
-const BUILDINGS = [{"index": 0, "emotion": "joy", "objects": [], "spatial": "neutral", "color": "#FFEB3B", "accent": "#FF9800", "geometry": "box", "scale": 1.0, "height": 2.5, "position": {"x": 3.2, "y": 1.25, "z": 0.0}, "snippet": "I remember my first day of school. I was nervous but excited.", "date": "2026-07-06 19:02"}, {"index": 1, "emotion": "nostalgia", "objects": ["school", "classroom", "hallway", "backpack"], "spatial": "open", "color": "#AB47BC", "accent": "#7B1FA2", "geometry": "cylinder", "scale": 1.4, "height": 3.1, "position": {"x": -3.34, "y": 1.55, "z": 3.06}, "snippet": "last day of school", "date": "2026-07-06 19:11"}, {"index": 2, "emotion": "nostalgia", "objects": ["school", "classroom", "desk", "lockers"], "spatial": "crowded", "color": "#AB47BC", "accent": "#7B1FA2", "geometry": "cylinder", "scale": 0.7, "height": 2.05, "position": {"x": 0.48, "y": 1.02, "z": -5.52}, "snippet": "my last day of school", "date": "2026-07-06 19:44"}, {"index": 3, "emotion": "nostalgia", "objects": ["school", "classroom", "lockers", "desk"], "spatial": "crowded", "color": "#AB47BC", "accent": "#7B1FA2", "geometry": "cylinder", "scale": 0.7, "height": 2.69, "position": {"x": 3.89, "y": 1.35, "z": 5.08}, "snippet": "last day of school", "date": "2026-07-06 19:55"}, {"index": 4, "emotion": "nostalgia", "objects": ["college", "dorm", "lecture hall"], "spatial": "crowded", "color": "#AB47BC", "accent": "#7B1FA2", "geometry": "box", "scale": 0.7, "height": 7.23, "position": {"x": -7.05, "y": 3.61, "z": -1.25}, "snippet": "last day of college", "date": "2026-07-06 20:08"}, {"index": 5, "emotion": "nostalgia", "objects": ["school", "classroom", "hallway"], "spatial": "crowded", "color": "#AB47BC", "accent": "#7B1FA2", "geometry": "cylinder", "scale": 0.7, "height": 8.99, "position": {"x": 6.61, "y": 4.49, "z": -4.21}, "snippet": "last day of school", "date": "2026-07-06 20:17"}, {"index": 6, "emotion": "nostalgia", "objects": ["calendar", "clock"], "spatial": "neutral", "color": "#AB47BC", "accent": "#F06292", "geometry": "box", "scale": 1.0, "height": 10.18, "position": {"x": -2.2, "y": 5.09, "z": 8.18}, "snippet": "last day of year", "date": "2026-07-06 20:30"}, {"index": 7, "emotion": "neutral", "objects": ["calendar", "date", "month"], "spatial": "neutral", "color": "#B0BEC5", "accent": "#4DD0E1", "geometry": "box", "scale": 1.0, "height": 10.27, "position": {"x": -4.17, "y": 5.13, "z": -8.03}, "snippet": "last day of month", "date": "2026-07-06 20:40"}];
+const BUILDINGS = [{"index": 0, "emotion": "joy", "objects": [], "spatial": "neutral", "color": "#FFEB3B", "accent": "#FF9800", "geometry": "box", "scale": 1.0, "height": 2.5, "position": {"x": 3.2, "y": 1.25, "z": 0.0}, "snippet": "I remember my first day of school. I was nervous but excited.", "date": "2026-07-06 19:02"}, {"index": 1, "emotion": "nostalgia", "objects": ["school", "classroom", "hallway", "backpack"], "spatial": "open", "color": "#AB47BC", "accent": "#7B1FA2", "geometry": "cylinder", "scale": 1.4, "height": 3.1, "position": {"x": -3.34, "y": 1.55, "z": 3.06}, "snippet": "last day of school", "date": "2026-07-06 19:11"}, {"index": 2, "emotion": "nostalgia", "objects": ["school", "classroom", "desk", "lockers"], "spatial": "crowded", "color": "#AB47BC", "accent": "#7B1FA2", "geometry": "cylinder", "scale": 0.7, "height": 2.05, "position": {"x": 0.48, "y": 1.02, "z": -5.52}, "snippet": "my last day of school", "date": "2026-07-06 19:44"}, {"index": 3, "emotion": "nostalgia", "objects": ["school", "classroom", "lockers", "desk"], "spatial": "crowded", "color": "#AB47BC", "accent": "#7B1FA2", "geometry": "cylinder", "scale": 0.7, "height": 2.69, "position": {"x": 3.89, "y": 1.35, "z": 5.08}, "snippet": "last day of school", "date": "2026-07-06 19:55"}, {"index": 4, "emotion": "nostalgia", "objects": ["college", "dorm", "lecture hall"], "spatial": "crowded", "color": "#AB47BC", "accent": "#7B1FA2", "geometry": "box", "scale": 0.7, "height": 7.23, "position": {"x": -7.05, "y": 3.61, "z": -1.25}, "snippet": "last day of college", "date": "2026-07-06 20:08"}, {"index": 5, "emotion": "nostalgia", "objects": ["school", "classroom", "hallway"], "spatial": "crowded", "color": "#AB47BC", "accent": "#7B1FA2", "geometry": "cylinder", "scale": 0.7, "height": 8.99, "position": {"x": 6.61, "y": 4.49, "z": -4.21}, "snippet": "last day of school", "date": "2026-07-06 20:17"}, {"index": 6, "emotion": "nostalgia", "objects": ["calendar", "clock"], "spatial": "neutral", "color": "#AB47BC", "accent": "#F06292", "geometry": "box", "scale": 1.0, "height": 10.18, "position": {"x": -2.2, "y": 5.09, "z": 8.18}, "snippet": "last day of year", "date": "2026-07-06 20:30"}, {"index": 7, "emotion": "neutral", "objects": ["calendar", "date", "month"], "spatial": "neutral", "color": "#B0BEC5", "accent": "#4DD0E1", "geometry": "box", "scale": 1.0, "height": 10.27, "position": {"x": -4.17, "y": 5.13, "z": -8.03}, "snippet": "last day of month", "date": "2026-07-06 20:40"}, {"index": 8, "emotion": "fear", "objects": ["college", "campus", "classroom"], "spatial": "crowded", "color": "#37474F", "accent": "#00E676", "geometry": "box", "scale": 0.7, "height": 42.42, "position": {"x": 9.02, "y": 21.21, "z": 3.29}, "snippet": "my 1st day in college and I am so nervous", "date": "2026-07-06 20:54"}];
 
 const scene = new THREE.Scene();
 scene.fog = new THREE.FogExp2(0x070c1e, 0.013);
@@ -91,7 +91,7 @@ let lookAtGoal = lookAtTarget.clone();
 
 function updateCamera() {
   camPhi = Math.max(0.15, Math.min(1.5, camPhi));
-  camDistance = Math.max(6, Math.min(160, camDistance));
+  camDistance = Math.max(6, Math.min(320, camDistance));
   camera.position.x = lookAtTarget.x + camDistance * Math.sin(camPhi) * Math.sin(camTheta);
   camera.position.y = lookAtTarget.y + camDistance * Math.cos(camPhi);
   camera.position.z = lookAtTarget.z + camDistance * Math.sin(camPhi) * Math.cos(camTheta);
@@ -185,11 +185,13 @@ function makeGeometry(key, s, h) {
   switch (key) {
     case 'sphere': return new THREE.SphereGeometry(1.15*s, 20, 16);
     case 'torusKnot': return new THREE.TorusKnotGeometry(0.75*s, 0.3*s, 100, 16);
-    case 'cylinder': return new THREE.CylinderGeometry(1.05*s, 1.05*s, h, 20);
+    case 'cylinder': return new THREE.CylinderGeometry(0.78*s, 0.78*s, h, 20);
     case 'dodecahedron': return new THREE.DodecahedronGeometry(1.15*s);
     case 'icosahedron': return new THREE.IcosahedronGeometry(1.15*s);
     case 'cone': return new THREE.ConeGeometry(1.1*s, h, 20);
-    default: return new THREE.BoxGeometry(2.1*s, h, 2.1*s);
+    // Slimmer footprint than before (1.5 instead of 2.1) - tall + narrow
+    // reads as a real tower instead of a squat block.
+    default: return new THREE.BoxGeometry(1.5*s, h, 1.5*s);
   }
 }
 
@@ -198,27 +200,33 @@ function makeGeometry(key, s, h) {
 // meshes. This is what gives GitCity-style buildings their "designed"
 // texture (colored stripes, varied window states) instead of a flat tint,
 // and it's much cheaper to render than one mesh per window.
-function buildFacadeTexture(accentHex) {
+function buildFacadeTexture(accentHex, h) {
   const texW = 192, texH = 384;
   const canvas = document.createElement('canvas');
   canvas.width = texW; canvas.height = texH;
   const ctx = canvas.getContext('2d');
-  ctx.fillStyle = '#dfe6ee';
+
+  // Dark graphite/navy facade (Git City style) instead of a light gray
+  // panel - this is what makes the lit windows actually pop instead of
+  // reading as a flat pale wall.
+  ctx.fillStyle = '#0c1120';
   ctx.fillRect(0, 0, texW, texH);
 
   // faint vertical panel seams
-  ctx.strokeStyle = 'rgba(0,0,0,0.08)';
+  ctx.strokeStyle = 'rgba(255,255,255,0.05)';
   const seams = 6;
   for (let i = 1; i < seams; i++) {
     ctx.beginPath(); ctx.moveTo(i * texW / seams, 0); ctx.lineTo(i * texW / seams, texH); ctx.stroke();
   }
 
-  const rows = 20, cols = 8;
+  // Row count scales with the building's real height so windows stay
+  // roughly floor-sized instead of stretching thin on tall towers.
+  const rows = Math.max(14, Math.min(90, Math.round((h || 12) * 2.4)));
+  const cols = 8;
   const cellW = texW / cols, cellH = texH / rows;
 
-  // faint horizontal floor divider lines - extra texture layer under the
-  // window grid so facades read as stacked floors, not one flat surface
-  ctx.strokeStyle = 'rgba(0,0,0,0.06)';
+  // faint horizontal floor divider lines
+  ctx.strokeStyle = 'rgba(255,255,255,0.04)';
   for (let r = 1; r < rows; r++) {
     ctx.beginPath(); ctx.moveTo(0, r * cellH); ctx.lineTo(texW, r * cellH); ctx.stroke();
   }
@@ -230,19 +238,27 @@ function buildFacadeTexture(accentHex) {
   for (let r = 0; r < rows; r++) {
     const isBand = bandRows.has(r);
     for (let c = 0; c < cols; c++) {
-      const pad = cellW * 0.22;
-      const x = c * cellW + pad, y = r * cellH + cellH * 0.25;
-      const wsz = cellW - 2 * pad, hsz = cellH * 0.5;
+      const pad = cellW * 0.24;
+      const x = c * cellW + pad, y = r * cellH + cellH * 0.22;
+      const wsz = cellW - 2 * pad, hsz = cellH * 0.56;
       if (isBand) {
-        ctx.globalAlpha = 0.9;
+        ctx.globalAlpha = 0.85;
         ctx.fillStyle = accentHex;
       } else {
-        // Dim by default - most windows read as dark glass at rest, with a
-        // small fraction lit blue-white, so the whole city looks moody
-        // until a building is selected and its glow gets boosted.
-        const lit = Math.random() > 0.72;
-        ctx.globalAlpha = lit ? 0.95 : 0.6;
-        ctx.fillStyle = lit ? '#bfe3ff' : '#141a2c';
+        // Mostly dark glass at rest, a modest fraction lit warm gold with
+        // an occasional cool cyan window mixed in - a calmer, more varied
+        // look than the old mostly-lit blue-white grid.
+        const roll = Math.random();
+        if (roll > 0.82) {
+          ctx.globalAlpha = 0.9;
+          ctx.fillStyle = '#ffce6b';
+        } else if (roll > 0.74) {
+          ctx.globalAlpha = 0.8;
+          ctx.fillStyle = '#8fd8ff';
+        } else {
+          ctx.globalAlpha = 0.9;
+          ctx.fillStyle = '#141b30';
+        }
       }
       ctx.fillRect(x, y, wsz, hsz);
       ctx.globalAlpha = 1;
@@ -271,8 +287,8 @@ function buildFacadeTexture(accentHex) {
 function addRoofDetails(parent, key, plinthScale, capScale, h, accentColor) {
   if (key === 'box' || key === 'cylinder') {
     const capGeo = key === 'box'
-      ? new THREE.BoxGeometry(2.1 * capScale * 1.1, 0.18, 2.1 * capScale * 1.1)
-      : new THREE.CylinderGeometry(1.05 * capScale * 1.12, 1.05 * capScale * 1.12, 0.18, 20);
+      ? new THREE.BoxGeometry(1.5 * capScale * 1.1, 0.18, 1.5 * capScale * 1.1)
+      : new THREE.CylinderGeometry(0.78 * capScale * 1.12, 0.78 * capScale * 1.12, 0.18, 20);
     const capMat = new THREE.MeshStandardMaterial({
       color: new THREE.Color(accentColor), emissive: new THREE.Color(accentColor),
       emissiveIntensity: 0.5, roughness: 0.4, metalness: 0.5,
@@ -307,7 +323,7 @@ function addRoofDetails(parent, key, plinthScale, capScale, h, accentColor) {
     }
   }
 
-  const plinthGeo = new THREE.CylinderGeometry(1.4 * plinthScale + 0.3, 1.55 * plinthScale + 0.4, 0.22, 24);
+  const plinthGeo = new THREE.CylinderGeometry(1.0 * plinthScale + 0.3, 1.1 * plinthScale + 0.4, 0.22, 24);
   const plinthMat = new THREE.MeshStandardMaterial({ color: 0x14141c, roughness: 0.9 });
   const plinth = new THREE.Mesh(plinthGeo, plinthMat);
   plinth.position.y = -h / 2 - 0.1;
@@ -359,7 +375,7 @@ function buildBuildingGroup(b, h) {
   if (!isTiered) {
     const geo = makeGeometry(key, s, h);
     const mat = new THREE.MeshStandardMaterial({
-      color: 0xdfe6ee, emissive: new THREE.Color(accent), emissiveIntensity: 0.4,
+      color: 0xdfe6ee, emissive: new THREE.Color(accent), emissiveIntensity: 0.22,
       metalness: 0.3, roughness: 0.45, envMapIntensity: 0.8,
     });
     materials.push(mat);
@@ -373,10 +389,13 @@ function buildBuildingGroup(b, h) {
     return { group, materials };
   }
 
-  const tex = buildFacadeTexture(accent);
-  const tierCount = h > 18 ? 3 : (h > 9 ? 2 : 1);
-  const heightFracs = tierCount === 3 ? [0.46, 0.32, 0.22] : tierCount === 2 ? [0.62, 0.38] : [1.0];
-  const widthFactor = 0.76;
+  const tex = buildFacadeTexture(accent, h);
+  // Mostly one slender tower with a single narrower cap tier near the top
+  // (a slight setback, not a wedding cake) - reads as a real skyscraper the
+  // taller it gets, instead of visibly shrinking in three big steps.
+  const tierCount = h > 14 ? 2 : 1;
+  const heightFracs = tierCount === 2 ? [0.84, 0.16] : [1.0];
+  const widthFactor = 0.7;
   let cursorY = -h / 2;
   let topScale = s;
 
@@ -385,10 +404,10 @@ function buildBuildingGroup(b, h) {
     const tierScale = s * Math.pow(widthFactor, i);
     topScale = tierScale;
     const geo = key === 'box'
-      ? new THREE.BoxGeometry(2.1 * tierScale, tierH, 2.1 * tierScale)
-      : new THREE.CylinderGeometry(1.05 * tierScale, 1.05 * tierScale, tierH, 20);
+      ? new THREE.BoxGeometry(1.5 * tierScale, tierH, 1.5 * tierScale)
+      : new THREE.CylinderGeometry(0.78 * tierScale, 0.78 * tierScale, tierH, 20);
     const mat = new THREE.MeshStandardMaterial({
-      map: tex, color: 0xffffff, emissive: new THREE.Color(accent), emissiveIntensity: 0.22,
+      map: tex, color: 0xffffff, emissive: new THREE.Color(accent), emissiveIntensity: 0.12,
       metalness: 0.25, roughness: 0.5, envMapIntensity: 0.8,
     });
     materials.push(mat);
@@ -411,9 +430,11 @@ const raycaster = new THREE.Raycaster();
 const labelEl = document.getElementById('label');
 
 const maxRadius = BUILDINGS.reduce((m, b) => Math.max(m, Math.hypot(b.position.x, b.position.z)), 0);
-const OVERVIEW_DISTANCE = Math.max(24, maxRadius * 1.6 + 14);
+const maxHeight = BUILDINGS.reduce((m, b) => Math.max(m, b.height || 2.5), 0);
+const OVERVIEW_DISTANCE = Math.max(24, maxRadius * 1.6 + 14, maxHeight * 1.4 + 18);
 camDistance = OVERVIEW_DISTANCE;
 camDistanceGoal = OVERVIEW_DISTANCE;
+camPhi = camPhiGoal = 0.85;
 updateCamera();
 
 const buildingRegistry = {};
@@ -425,13 +446,15 @@ BUILDINGS.forEach(b => {
   group.userData = b;
   scene.add(group);
 
-  // Small glowing marker light per building so the city glows at night
-  const baseLightIntensity = 0.6;
-  const glow = new THREE.PointLight(new THREE.Color(b.accent), baseLightIntensity, 6);
-  glow.position.set(b.position.x, b.position.y + 1.5, b.position.z);
+  // Small glowing marker light per building - kept subtle at rest (sqrt of
+  // height, not linear) so tall towers don't turn into blown-out light
+  // bulbs; a tapped building still pops via applyHighlight() below.
+  const baseLightIntensity = 0.28;
+  const glow = new THREE.PointLight(new THREE.Color(b.accent), baseLightIntensity, 7);
+  glow.position.set(b.position.x, b.position.y + h * 0.3, b.position.z);
   scene.add(glow);
-  const baseSpriteScale = Math.max(2.2, h * 0.9);
-  const baseSpriteOpacity = 0.55;
+  const baseSpriteScale = Math.max(1.6, Math.sqrt(h) * 1.15);
+  const baseSpriteOpacity = 0.28;
   const sprite = addGlowSprite(glow.position, b.accent, baseSpriteScale);
 
   buildingRegistry[b.index] = {
@@ -463,10 +486,10 @@ function clearHighlight(idx) {
 function applyHighlight(idx) {
   const reg = buildingRegistry[idx];
   if (!reg) return;
-  reg.materials.forEach((m, i) => { m.emissiveIntensity = reg.baseEmissive[i] + 1.1; });
-  reg.light.intensity = reg.baseLightIntensity * 4.5;
-  reg.sprite.material.opacity = 0.95;
-  reg.sprite.scale.set(reg.baseSpriteScale * 1.6, reg.baseSpriteScale * 1.6, 1);
+  reg.materials.forEach((m, i) => { m.emissiveIntensity = reg.baseEmissive[i] + 0.75; });
+  reg.light.intensity = reg.baseLightIntensity * 4.0;
+  reg.sprite.material.opacity = 0.85;
+  reg.sprite.scale.set(reg.baseSpriteScale * 1.5, reg.baseSpriteScale * 1.5, 1);
 }
 
 function setSelected(idx) {
@@ -535,7 +558,7 @@ renderer.domElement.addEventListener('pointerup', (e) => {
 });
 
 renderer.domElement.addEventListener('wheel', (e) => {
-  camDistanceGoal = Math.max(6, Math.min(160, camDistanceGoal + e.deltaY * 0.03));
+  camDistanceGoal = Math.max(6, Math.min(320, camDistanceGoal + e.deltaY * 0.03));
   camDistance = camDistanceGoal;
   updateCamera();
 }, { passive: true });
