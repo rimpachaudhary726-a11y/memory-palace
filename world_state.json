@@ -172,5 +172,27 @@
     },
     "snippet": "last day of month",
     "date": "2026-07-06 20:40"
+  },
+  {
+    "index": 8,
+    "emotion": "fear",
+    "objects": [
+      "college",
+      "campus",
+      "classroom"
+    ],
+    "spatial": "crowded",
+    "color": "#37474F",
+    "accent": "#00E676",
+    "geometry": "box",
+    "scale": 0.7,
+    "height": 42.42,
+    "position": {
+      "x": 9.02,
+      "y": 21.21,
+      "z": 3.29
+    },
+    "snippet": "my 1st day in college and I am so nervous",
+    "date": "2026-07-06 20:54"
   }
 ]
