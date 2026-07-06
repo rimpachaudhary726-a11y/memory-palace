@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Living Memory Palace</title>
 <style>
-  html, body { margin:0; overflow:hidden; background:#05050a; font-family: sans-serif; }
+  html, body { margin:0; overflow:hidden; background:#2a1030; font-family: sans-serif; }
   #label {
     position:fixed; bottom:20px; left:50%; transform:translateX(-50%);
     max-width:90%; background:rgba(10,10,15,0.85); color:#f1f1f1;
@@ -40,10 +40,10 @@ window.addEventListener('error', function(e) {
 });
 
 try {
-const BUILDINGS = [{"index": 0, "emotion": "joy", "objects": [], "spatial": "neutral", "color": "#FFEB3B", "accent": "#FF9800", "geometry": "box", "scale": 1.0, "height": 2.5, "position": {"x": 3.2, "y": 1.25, "z": 0.0}, "snippet": "I remember my first day of school. I was nervous but excited.", "date": "2026-07-06 19:02"}, {"index": 1, "emotion": "nostalgia", "objects": ["school", "classroom", "hallway", "backpack"], "spatial": "open", "color": "#AB47BC", "accent": "#7B1FA2", "geometry": "cylinder", "scale": 1.4, "height": 3.1, "position": {"x": -3.34, "y": 1.55, "z": 3.06}, "snippet": "last day of school", "date": "2026-07-06 19:11"}, {"index": 2, "emotion": "nostalgia", "objects": ["school", "classroom", "desk", "lockers"], "spatial": "crowded", "color": "#AB47BC", "accent": "#7B1FA2", "geometry": "cylinder", "scale": 0.7, "height": 2.05, "position": {"x": 0.48, "y": 1.02, "z": -5.52}, "snippet": "my last day of school", "date": "2026-07-06 19:44"}, {"index": 3, "emotion": "nostalgia", "objects": ["school", "classroom", "lockers", "desk"], "spatial": "crowded", "color": "#AB47BC", "accent": "#7B1FA2", "geometry": "cylinder", "scale": 0.7, "height": 2.69, "position": {"x": 3.89, "y": 1.35, "z": 5.08}, "snippet": "last day of school", "date": "2026-07-06 19:55"}, {"index": 4, "emotion": "nostalgia", "objects": ["college", "dorm", "lecture hall"], "spatial": "crowded", "color": "#AB47BC", "accent": "#7B1FA2", "geometry": "box", "scale": 0.7, "height": 7.23, "position": {"x": -7.05, "y": 3.61, "z": -1.25}, "snippet": "last day of college", "date": "2026-07-06 20:08"}];
+const BUILDINGS = [{"index": 0, "emotion": "joy", "objects": [], "spatial": "neutral", "color": "#FFEB3B", "accent": "#FF9800", "geometry": "box", "scale": 1.0, "height": 2.5, "position": {"x": 3.2, "y": 1.25, "z": 0.0}, "snippet": "I remember my first day of school. I was nervous but excited.", "date": "2026-07-06 19:02"}, {"index": 1, "emotion": "nostalgia", "objects": ["school", "classroom", "hallway", "backpack"], "spatial": "open", "color": "#AB47BC", "accent": "#7B1FA2", "geometry": "cylinder", "scale": 1.4, "height": 3.1, "position": {"x": -3.34, "y": 1.55, "z": 3.06}, "snippet": "last day of school", "date": "2026-07-06 19:11"}, {"index": 2, "emotion": "nostalgia", "objects": ["school", "classroom", "desk", "lockers"], "spatial": "crowded", "color": "#AB47BC", "accent": "#7B1FA2", "geometry": "cylinder", "scale": 0.7, "height": 2.05, "position": {"x": 0.48, "y": 1.02, "z": -5.52}, "snippet": "my last day of school", "date": "2026-07-06 19:44"}, {"index": 3, "emotion": "nostalgia", "objects": ["school", "classroom", "lockers", "desk"], "spatial": "crowded", "color": "#AB47BC", "accent": "#7B1FA2", "geometry": "cylinder", "scale": 0.7, "height": 2.69, "position": {"x": 3.89, "y": 1.35, "z": 5.08}, "snippet": "last day of school", "date": "2026-07-06 19:55"}, {"index": 4, "emotion": "nostalgia", "objects": ["college", "dorm", "lecture hall"], "spatial": "crowded", "color": "#AB47BC", "accent": "#7B1FA2", "geometry": "box", "scale": 0.7, "height": 7.23, "position": {"x": -7.05, "y": 3.61, "z": -1.25}, "snippet": "last day of college", "date": "2026-07-06 20:08"}, {"index": 5, "emotion": "nostalgia", "objects": ["school", "classroom", "hallway"], "spatial": "crowded", "color": "#AB47BC", "accent": "#7B1FA2", "geometry": "cylinder", "scale": 0.7, "height": 8.99, "position": {"x": 6.61, "y": 4.49, "z": -4.21}, "snippet": "last day of school", "date": "2026-07-06 20:17"}];
 
 const scene = new THREE.Scene();
-scene.fog = new THREE.FogExp2(0x05050a, 0.015);
+scene.fog = new THREE.FogExp2(0x2a1030, 0.012);
 
 const camera = new THREE.PerspectiveCamera(60, window.innerWidth/window.innerHeight, 0.1, 2000);
 
@@ -53,22 +53,30 @@ renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 document.body.appendChild(renderer.domElement);
 
-// Gradient sky dome - replaces the flat void behind the stars with a soft
-// navy-to-black backdrop, same trick GitCity-style scenes use for atmosphere.
+// Sunset sky dome - warm horizon fading up into dusky purple, replacing the
+// flat navy void. Also reused as scene.environment so glass windows and
+// metallic building trim have something real to reflect instead of
+// rendering flat/dark.
+let sunsetSkyTex;
 {
   const skyCanvas = document.createElement('canvas');
   skyCanvas.width = 2; skyCanvas.height = 256;
   const ctx = skyCanvas.getContext('2d');
   const grad = ctx.createLinearGradient(0, 0, 0, 256);
-  grad.addColorStop(0, '#0a0a1a');
-  grad.addColorStop(0.5, '#0d0d20');
-  grad.addColorStop(1, '#05050a');
+  grad.addColorStop(0, '#1b0f2e');
+  grad.addColorStop(0.35, '#4a1f45');
+  grad.addColorStop(0.6, '#c4552f');
+  grad.addColorStop(0.78, '#f0904a');
+  grad.addColorStop(1, '#2a1030');
   ctx.fillStyle = grad;
   ctx.fillRect(0, 0, 2, 256);
-  const skyTex = new THREE.CanvasTexture(skyCanvas);
+  sunsetSkyTex = new THREE.CanvasTexture(skyCanvas);
   const skyGeo = new THREE.SphereGeometry(900, 16, 16);
-  const skyMat = new THREE.MeshBasicMaterial({ map: skyTex, side: THREE.BackSide, fog: false });
+  const skyMat = new THREE.MeshBasicMaterial({ map: sunsetSkyTex, side: THREE.BackSide, fog: false });
   scene.add(new THREE.Mesh(skyGeo, skyMat));
+
+  sunsetSkyTex.mapping = THREE.EquirectangularReflectionMapping;
+  scene.environment = sunsetSkyTex;
 }
 
 // Small built-in orbit camera (no OrbitControls.js dependency - that file
@@ -102,8 +110,8 @@ function flyToBuilding(b) {
 }
 updateCamera();
 
-scene.add(new THREE.AmbientLight(0x404050, 0.7));
-scene.add(new THREE.HemisphereLight(0x8891ff, 0x0a0a10, 0.55));
+scene.add(new THREE.AmbientLight(0x6b4a55, 0.7));
+scene.add(new THREE.HemisphereLight(0xf0904a, 0x2a1030, 0.65));
 
 const sun = new THREE.DirectionalLight(0xffd9a8, 1.0);
 sun.position.set(30, 55, 20);
@@ -134,7 +142,7 @@ scene.add(sun);
   }
   const starGeo = new THREE.BufferGeometry();
   starGeo.setAttribute('position', new THREE.BufferAttribute(starPositions, 3));
-  const starMat = new THREE.PointsMaterial({ color: 0xffffff, size: 1.4, sizeAttenuation: true });
+  const starMat = new THREE.PointsMaterial({ color: 0xffffff, size: 1.2, sizeAttenuation: true, transparent: true, opacity: 0.45 });
   scene.add(new THREE.Points(starGeo, starMat));
 }
 
@@ -146,9 +154,9 @@ scene.add(sun);
   gCanvas.width = size; gCanvas.height = size;
   const gctx = gCanvas.getContext('2d');
   const radial = gctx.createRadialGradient(size/2, size/2, 0, size/2, size/2, size/2);
-  radial.addColorStop(0, '#181826');
-  radial.addColorStop(0.6, '#101018');
-  radial.addColorStop(1, '#08080d');
+  radial.addColorStop(0, '#3a2038');
+  radial.addColorStop(0.6, '#241228');
+  radial.addColorStop(1, '#160a1c');
   gctx.fillStyle = radial;
   gctx.fillRect(0, 0, size, size);
   gctx.strokeStyle = 'rgba(255,255,255,0.04)';
@@ -170,36 +178,42 @@ scene.add(sun);
 
 function makeGeometry(key, s, h) {
   switch (key) {
-    case 'sphere': return new THREE.SphereGeometry(0.9*s, 20, 16);
-    case 'torusKnot': return new THREE.TorusKnotGeometry(0.55*s, 0.22*s, 100, 16);
-    case 'cylinder': return new THREE.CylinderGeometry(0.7*s, 0.7*s, h, 16);
-    case 'dodecahedron': return new THREE.DodecahedronGeometry(0.9*s);
-    case 'icosahedron': return new THREE.IcosahedronGeometry(0.9*s);
-    case 'cone': return new THREE.ConeGeometry(0.8*s, h, 16);
-    default: return new THREE.BoxGeometry(1.4*s, h, 1.4*s);
+    case 'sphere': return new THREE.SphereGeometry(1.15*s, 20, 16);
+    case 'torusKnot': return new THREE.TorusKnotGeometry(0.75*s, 0.3*s, 100, 16);
+    case 'cylinder': return new THREE.CylinderGeometry(1.05*s, 1.05*s, h, 20);
+    case 'dodecahedron': return new THREE.DodecahedronGeometry(1.15*s);
+    case 'icosahedron': return new THREE.IcosahedronGeometry(1.15*s);
+    case 'cone': return new THREE.ConeGeometry(1.1*s, h, 20);
+    default: return new THREE.BoxGeometry(2.1*s, h, 2.1*s);
   }
 }
 
-// Small emissive squares on box/cylinder buildings so they read as a
-// lit skyline rather than flat colored shapes - same visual language
-// as Git City's window grid.
+// Reflective glass windows - low roughness / high metalness so they pick up
+// the sky and building lights around them, like real glazed panels, instead
+// of flat colored squares. Lit windows stay emissive on top of that so the
+// building still glows at night.
 function addWindows(mesh, key, s, h) {
   if (key !== 'box' && key !== 'cylinder') return;
   const rows = Math.max(2, Math.floor(h / 0.7));
-  const cols = 3;
-  const winGeo = new THREE.PlaneGeometry(0.16, 0.16);
-  const faceWidth = key === 'box' ? 1.4 * s : 0.7 * s * 1.8;
+  const cols = key === 'box' ? 4 : 3;
+  const winGeo = new THREE.PlaneGeometry(0.22, 0.22);
+  const faceWidth = key === 'box' ? 2.1 * s : 1.05 * s * 1.8;
+  const faceZ = key === 'box' ? 1.05 * s : 1.05 * s;
   for (let row = 0; row < rows; row++) {
     for (let col = 0; col < cols; col++) {
       const lit = Math.random() > 0.35;
-      const winMat = new THREE.MeshBasicMaterial({
-        color: lit ? 0xfff2c0 : 0x1a1a22,
-        transparent: true, opacity: lit ? 0.95 : 0.5,
+      const winMat = new THREE.MeshPhysicalMaterial({
+        color: lit ? 0xfff2c0 : 0x9fd6ff,
+        emissive: lit ? new THREE.Color(0xffdf9c) : new THREE.Color(0x000000),
+        emissiveIntensity: lit ? 0.85 : 0,
+        metalness: 0.3, roughness: 0.05,
+        transparent: true, opacity: lit ? 0.95 : 0.55,
+        reflectivity: 1.0, clearcoat: 1.0, clearcoatRoughness: 0.05,
       });
       const win = new THREE.Mesh(winGeo, winMat);
       const yOff = -h/2 + 0.45 + row * 0.65;
-      const xOff = (col - 1) * (faceWidth / 4.2);
-      win.position.set(xOff, yOff, (key === 'box' ? 0.7 * s : 0.7 * s) + 0.01);
+      const xOff = (col - (cols - 1) / 2) * (faceWidth / (cols + 1.2));
+      win.position.set(xOff, yOff, faceZ + 0.01);
       mesh.add(win);
     }
   }
@@ -212,8 +226,8 @@ function addWindows(mesh, key, s, h) {
 function addRoofAndPlinth(parent, key, s, h, accentColor) {
   if (key === 'box' || key === 'cylinder') {
     const capGeo = key === 'box'
-      ? new THREE.BoxGeometry(1.4 * s * 1.08, 0.18, 1.4 * s * 1.08)
-      : new THREE.CylinderGeometry(0.7 * s * 1.1, 0.7 * s * 1.1, 0.18, 16);
+      ? new THREE.BoxGeometry(2.1 * s * 1.08, 0.18, 2.1 * s * 1.08)
+      : new THREE.CylinderGeometry(1.05 * s * 1.1, 1.05 * s * 1.1, 0.18, 20);
     const capMat = new THREE.MeshStandardMaterial({
       color: new THREE.Color(accentColor), emissive: new THREE.Color(accentColor),
       emissiveIntensity: 0.5, roughness: 0.4, metalness: 0.5,
@@ -233,7 +247,7 @@ function addRoofAndPlinth(parent, key, s, h, accentColor) {
     }
   }
 
-  const plinthGeo = new THREE.CylinderGeometry(0.95 * s + 0.25, 1.05 * s + 0.3, 0.22, 20);
+  const plinthGeo = new THREE.CylinderGeometry(1.4 * s + 0.3, 1.55 * s + 0.4, 0.22, 24);
   const plinthMat = new THREE.MeshStandardMaterial({ color: 0x14141c, roughness: 0.9 });
   const plinth = new THREE.Mesh(plinthGeo, plinthMat);
   plinth.position.y = -h / 2 - 0.1;
