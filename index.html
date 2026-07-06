@@ -27,7 +27,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 </head>
 <body>
-<div id="hint">drag to orbit - scroll to zoom - tap a building to recall its memory</div>
+<div id="hint">drag to orbit - scroll to zoom - tap a building to fly to its memory - tap empty space to reset view</div>
 <div id="status">loading Three.js...</div>
 <div id="label"></div>
 <script>
@@ -40,7 +40,7 @@ window.addEventListener('error', function(e) {
 });
 
 try {
-const BUILDINGS = [{"index": 0, "emotion": "joy", "objects": [], "spatial": "neutral", "color": "#FFEB3B", "accent": "#FF9800", "geometry": "box", "scale": 1.0, "height": 2.5, "position": {"x": 3.2, "y": 1.25, "z": 0.0}, "snippet": "I remember my first day of school. I was nervous but excited.", "date": "2026-07-06 19:02"}, {"index": 1, "emotion": "nostalgia", "objects": ["school", "classroom", "hallway", "backpack"], "spatial": "open", "color": "#AB47BC", "accent": "#7B1FA2", "geometry": "cylinder", "scale": 1.4, "height": 3.1, "position": {"x": -3.34, "y": 1.55, "z": 3.06}, "snippet": "last day of school", "date": "2026-07-06 19:11"}, {"index": 2, "emotion": "nostalgia", "objects": ["school", "classroom", "desk", "lockers"], "spatial": "crowded", "color": "#AB47BC", "accent": "#7B1FA2", "geometry": "cylinder", "scale": 0.7, "height": 2.05, "position": {"x": 0.48, "y": 1.02, "z": -5.52}, "snippet": "my last day of school", "date": "2026-07-06 19:44"}];
+const BUILDINGS = [{"index": 0, "emotion": "joy", "objects": [], "spatial": "neutral", "color": "#FFEB3B", "accent": "#FF9800", "geometry": "box", "scale": 1.0, "height": 2.5, "position": {"x": 3.2, "y": 1.25, "z": 0.0}, "snippet": "I remember my first day of school. I was nervous but excited.", "date": "2026-07-06 19:02"}, {"index": 1, "emotion": "nostalgia", "objects": ["school", "classroom", "hallway", "backpack"], "spatial": "open", "color": "#AB47BC", "accent": "#7B1FA2", "geometry": "cylinder", "scale": 1.4, "height": 3.1, "position": {"x": -3.34, "y": 1.55, "z": 3.06}, "snippet": "last day of school", "date": "2026-07-06 19:11"}, {"index": 2, "emotion": "nostalgia", "objects": ["school", "classroom", "desk", "lockers"], "spatial": "crowded", "color": "#AB47BC", "accent": "#7B1FA2", "geometry": "cylinder", "scale": 0.7, "height": 2.05, "position": {"x": 0.48, "y": 1.02, "z": -5.52}, "snippet": "my last day of school", "date": "2026-07-06 19:44"}, {"index": 3, "emotion": "neutral", "objects": ["place"], "spatial": "neutral", "color": "#B0BEC5", "accent": "#78909C", "geometry": "box", "scale": 1.0, "height": 2.62, "position": {"x": 3.89, "y": 1.31, "z": 5.08}, "snippet": "a", "date": "2026-07-06 19:55"}];
 
 const scene = new THREE.Scene();
 scene.fog = new THREE.FogExp2(0x05050a, 0.015);
@@ -53,15 +53,32 @@ document.body.appendChild(renderer.domElement);
 
 // Small built-in orbit camera (no OrbitControls.js dependency - that file
 // isn't reliably available from CDNs for a plain script tag anymore, so
-// this avoids the external-file failure point entirely).
+// this avoids the external-file failure point entirely). Orbits around
+// `lookAtTarget`, which can be smoothly animated toward a tapped building
+// for a "fly over and land" feel instead of a hard cut.
 let camDistance = 34, camTheta = 0.0, camPhi = 1.0;
+let camDistanceGoal = camDistance;
+let lookAtTarget = new THREE.Vector3(0, 3, 0);
+let lookAtGoal = lookAtTarget.clone();
+
 function updateCamera() {
   camPhi = Math.max(0.15, Math.min(1.5, camPhi));
   camDistance = Math.max(6, Math.min(160, camDistance));
-  camera.position.x = camDistance * Math.sin(camPhi) * Math.sin(camTheta);
-  camera.position.y = camDistance * Math.cos(camPhi);
-  camera.position.z = camDistance * Math.sin(camPhi) * Math.cos(camTheta);
-  camera.lookAt(0, 3, 0);
+  camera.position.x = lookAtTarget.x + camDistance * Math.sin(camPhi) * Math.sin(camTheta);
+  camera.position.y = lookAtTarget.y + camDistance * Math.cos(camPhi);
+  camera.position.z = lookAtTarget.z + camDistance * Math.sin(camPhi) * Math.cos(camTheta);
+  camera.lookAt(lookAtTarget);
+}
+
+function stepCameraTowardGoal() {
+  lookAtTarget.lerp(lookAtGoal, 0.06);
+  camDistance += (camDistanceGoal - camDistance) * 0.06;
+  updateCamera();
+}
+
+function flyToBuilding(b) {
+  lookAtGoal.set(b.position.x, b.position.y, b.position.z);
+  camDistanceGoal = Math.max(8, (b.height || 2.5) * 2 + 5);
 }
 updateCamera();
 
@@ -69,6 +86,25 @@ scene.add(new THREE.AmbientLight(0x404050, 1.1));
 const sun = new THREE.DirectionalLight(0xffffff, 0.9);
 sun.position.set(20, 40, 10);
 scene.add(sun);
+
+// Starfield - small white points scattered on a big sphere, purely
+// cosmetic, gives the night-city atmosphere Git City has.
+{
+  const starCount = 600;
+  const starPositions = new Float32Array(starCount * 3);
+  for (let i = 0; i < starCount; i++) {
+    const r = 300 + Math.random() * 300;
+    const theta = Math.random() * Math.PI * 2;
+    const phi = Math.acos(2 * Math.random() - 1);
+    starPositions[i*3]   = r * Math.sin(phi) * Math.cos(theta);
+    starPositions[i*3+1] = Math.abs(r * Math.cos(phi));
+    starPositions[i*3+2] = r * Math.sin(phi) * Math.sin(theta);
+  }
+  const starGeo = new THREE.BufferGeometry();
+  starGeo.setAttribute('position', new THREE.BufferAttribute(starPositions, 3));
+  const starMat = new THREE.PointsMaterial({ color: 0xffffff, size: 1.4, sizeAttenuation: true });
+  scene.add(new THREE.Points(starGeo, starMat));
+}
 
 // Ground
 const ground = new THREE.Mesh(
@@ -78,24 +114,57 @@ const ground = new THREE.Mesh(
 ground.rotation.x = -Math.PI / 2;
 scene.add(ground);
 
-function makeGeometry(key, s) {
+function makeGeometry(key, s, h) {
   switch (key) {
     case 'sphere': return new THREE.SphereGeometry(0.9*s, 20, 16);
     case 'torusKnot': return new THREE.TorusKnotGeometry(0.55*s, 0.22*s, 100, 16);
-    case 'cylinder': return new THREE.CylinderGeometry(0.7*s, 0.7*s, 1.8*s, 16);
+    case 'cylinder': return new THREE.CylinderGeometry(0.7*s, 0.7*s, h, 16);
     case 'dodecahedron': return new THREE.DodecahedronGeometry(0.9*s);
     case 'icosahedron': return new THREE.IcosahedronGeometry(0.9*s);
-    case 'cone': return new THREE.ConeGeometry(0.8*s, 1.8*s, 16);
-    default: return new THREE.BoxGeometry(1.4*s, 1.8*s, 1.4*s);
+    case 'cone': return new THREE.ConeGeometry(0.8*s, h, 16);
+    default: return new THREE.BoxGeometry(1.4*s, h, 1.4*s);
   }
 }
+
+// Small emissive squares on box/cylinder buildings so they read as a
+// lit skyline rather than flat colored shapes - same visual language
+// as Git City's window grid.
+function addWindows(mesh, key, s, h) {
+  if (key !== 'box' && key !== 'cylinder') return;
+  const rows = Math.max(2, Math.floor(h / 0.7));
+  const cols = 3;
+  const winGeo = new THREE.PlaneGeometry(0.16, 0.16);
+  const faceWidth = key === 'box' ? 1.4 * s : 0.7 * s * 1.8;
+  for (let row = 0; row < rows; row++) {
+    for (let col = 0; col < cols; col++) {
+      const lit = Math.random() > 0.35;
+      const winMat = new THREE.MeshBasicMaterial({
+        color: lit ? 0xfff2c0 : 0x1a1a22,
+        transparent: true, opacity: lit ? 0.95 : 0.5,
+      });
+      const win = new THREE.Mesh(winGeo, winMat);
+      const yOff = -h/2 + 0.45 + row * 0.65;
+      const xOff = (col - 1) * (faceWidth / 4.2);
+      win.position.set(xOff, yOff, (key === 'box' ? 0.7 * s : 0.7 * s) + 0.01);
+      mesh.add(win);
+    }
+  }
+}
+
 
 const clickable = [];
 const raycaster = new THREE.Raycaster();
 const labelEl = document.getElementById('label');
 
+const maxRadius = BUILDINGS.reduce((m, b) => Math.max(m, Math.hypot(b.position.x, b.position.z)), 0);
+const OVERVIEW_DISTANCE = Math.max(24, maxRadius * 1.6 + 14);
+camDistance = OVERVIEW_DISTANCE;
+camDistanceGoal = OVERVIEW_DISTANCE;
+updateCamera();
+
 BUILDINGS.forEach(b => {
-  const geo = makeGeometry(b.geometry, b.scale);
+  const h = b.height || 2.5;
+  const geo = makeGeometry(b.geometry, b.scale, h);
   const mat = new THREE.MeshStandardMaterial({
     color: new THREE.Color(b.color),
     emissive: new THREE.Color(b.accent),
@@ -106,6 +175,7 @@ BUILDINGS.forEach(b => {
   const mesh = new THREE.Mesh(geo, mat);
   mesh.position.set(b.position.x, b.position.y, b.position.z);
   mesh.userData = b;
+  addWindows(mesh, b.geometry, b.scale, h);
   scene.add(mesh);
   clickable.push(mesh);
 
@@ -132,6 +202,11 @@ function handlePick(clientX, clientY) {
   const hits = raycaster.intersectObjects(clickable);
   if (hits.length > 0) {
     showLabel(hits[0].object.userData);
+    flyToBuilding(hits[0].object.userData);
+  } else {
+    labelEl.style.display = 'none';
+    lookAtGoal.set(0, 3, 0);
+    camDistanceGoal = OVERVIEW_DISTANCE;
   }
 }
 
@@ -162,13 +237,15 @@ renderer.domElement.addEventListener('pointerup', (e) => {
 });
 
 renderer.domElement.addEventListener('wheel', (e) => {
-  camDistance += e.deltaY * 0.03;
+  camDistanceGoal = Math.max(6, Math.min(160, camDistanceGoal + e.deltaY * 0.03));
+  camDistance = camDistanceGoal;
   updateCamera();
 }, { passive: true });
 
 let firstFrameRendered = false;
 function animate() {
   requestAnimationFrame(animate);
+  stepCameraTowardGoal();
   renderer.render(scene, camera);
   if (!firstFrameRendered) {
     firstFrameRendered = true;
