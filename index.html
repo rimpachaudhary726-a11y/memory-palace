@@ -258,11 +258,11 @@ function makeGeometry(key, s, h) {
 function buildFacadeTexture(accentHex, h) {
   const texW = 256, texH = 512;
 
-  // Denser grid than before (14 cols instead of 9, more rows per unit of
-  // height) - tighter, blockier windows closer to Git City's packed pixel
-  // facades instead of a sparse dot pattern.
-  const rows = Math.max(20, Math.min(160, Math.round((h || 12) * 3.4)));
-  const cols = 14;
+  // Fewer, larger windows than the previous pass (9 cols instead of 14,
+  // a lower row-per-height multiplier) - the denser grid read as noisy
+  // speckle up close instead of clean, legible windows.
+  const rows = Math.max(12, Math.min(90, Math.round((h || 12) * 2.0)));
+  const cols = 9;
   const cellW = texW / cols, cellH = texH / rows;
 
   // Roll every cell's state ONCE and reuse it for both canvases, so the
@@ -359,6 +359,45 @@ function buildFacadeTexture(accentHex, h) {
 // Roof cap + rooftop greebles + base plinth. baseWidth/capWidth are now
 // real width/diameter units (not the old 0.6-1.4 emotional scale factor),
 // so these details stay properly proportioned now that towers are wider.
+// A genuinely glowing neon trim strip wrapping the tower's SIDE faces right
+// at the roofline (not the flat top cap plate itself) - unlit MeshBasicMaterial
+// with additive blending so it reads as a true light source regardless of
+// scene lighting, similar to the lit edge/rim trim in the reference shots.
+function addNeonRoofTrim(parent, key, capWidth, h, accentColor) {
+  const y = h / 2 - Math.max(0.06, capWidth * 0.015);
+  const thick = Math.max(0.05, capWidth * 0.035);
+  const trimMat = new THREE.MeshBasicMaterial({
+    color: new THREE.Color(accentColor), transparent: true, opacity: 0.95,
+    blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide,
+  });
+
+  if (key === 'cylinder') {
+    const ringGeo = new THREE.TorusGeometry(capWidth * 0.5 * 0.98, thick * 0.5, 8, 28);
+    const ring = new THREE.Mesh(ringGeo, trimMat);
+    ring.rotation.x = Math.PI / 2;
+    ring.position.y = y;
+    parent.add(ring);
+    return;
+  }
+
+  // Box tower: four thin glowing bars tracing the perimeter, just inset
+  // from the corners so they read as a lit trim line, not a solid frame.
+  const half = capWidth * 0.5 * 0.99;
+  const lenGeo = new THREE.BoxGeometry(capWidth * 0.98, thick, thick);
+  const depGeo = new THREE.BoxGeometry(thick, thick, capWidth * 0.98);
+  const edges = [
+    { geo: lenGeo, pos: [0, y, half] },
+    { geo: lenGeo, pos: [0, y, -half] },
+    { geo: depGeo, pos: [half, y, 0] },
+    { geo: depGeo, pos: [-half, y, 0] },
+  ];
+  edges.forEach(e => {
+    const bar = new THREE.Mesh(e.geo, trimMat);
+    bar.position.set(e.pos[0], e.pos[1], e.pos[2]);
+    parent.add(bar);
+  });
+}
+
 function addRoofDetails(parent, key, baseWidth, capWidth, h, accentColor) {
   if (key === 'box' || key === 'cylinder') {
     const capGeo = key === 'box'
@@ -372,6 +411,8 @@ function addRoofDetails(parent, key, baseWidth, capWidth, h, accentColor) {
     cap.position.y = h / 2 + 0.09;
     cap.castShadow = true;
     parent.add(cap);
+
+    addNeonRoofTrim(parent, key, capWidth, h, accentColor);
 
     // Rooftop greebles - small AC unit + water-tank silhouettes, the kind of
     // clutter that reads as "real building" from a distance.
