@@ -557,6 +557,8 @@ function addRoofDetails(parent, key, baseWidth, capWidth, h, accentColor) {
   addGroundRing(parent, baseWidth, h, accentColor);
   addRoofOrb(parent, capWidth, h, accentColor);
   addEnergyLines(parent, key, baseWidth, h, accentColor);
+  addRoofFlag(parent, capWidth, h, accentColor);
+  addScanRing(parent, baseWidth, h, accentColor);
 }
 
 // The vertical "searchlight" shooting up from a rooftop into the sky - the
@@ -595,6 +597,25 @@ function addRooftopBeam(parent, capWidth, h, accentColor) {
 // "landing pad" halo visible around towers in the Git City screenshots.
 // A wider soft outer ring plus a thin bright inner ring reads as more
 // detailed/layered than a single flat ring.
+// A glowing ring that wraps horizontally around a tower's body (not just
+// sitting at the ground) and continuously travels from the base to the
+// roof and back - the "laser ring around the building" effect, moving up
+// and down on a loop rather than sitting still.
+const scanRingEntries = [];
+function addScanRing(parent, footprint, h, accentColor) {
+  const ringRadius = footprint * 0.62 + 0.15;
+  const geo = new THREE.TorusGeometry(ringRadius, 0.06, 8, 32);
+  const mat = new THREE.MeshBasicMaterial({
+    color: new THREE.Color(accentColor), transparent: true, opacity: 0.85,
+    blending: THREE.AdditiveBlending, depthWrite: false,
+  });
+  const ring = new THREE.Mesh(geo, mat);
+  ring.rotation.x = Math.PI / 2; // lie flat so it encircles the vertical tower
+  parent.add(ring);
+  scanRingEntries.push({ ring, h, phase: Math.random() * Math.PI * 2, speed: 0.35 + Math.random() * 0.25 });
+}
+
+const pulsingRingMaterials = [];
 function addGroundRing(parent, baseWidth, h, accentColor) {
   // Clearance is measured against the plinth's own outer radius
   // (baseWidth * 0.68 + 0.45, see addRoofDetails) plus a safety margin,
@@ -611,6 +632,7 @@ function addGroundRing(parent, baseWidth, h, accentColor) {
   ring.rotation.x = -Math.PI / 2;
   ring.position.y = -h / 2 - 0.09;
   parent.add(ring);
+  pulsingRingMaterials.push({ mat: ringMat, base: 0.5, phase: Math.random() * Math.PI * 2 });
 
   const ring2Geo = new THREE.RingGeometry(Math.max(0.1, inner - 0.55), Math.max(0.14, inner - 0.4), 48);
   const ring2Mat = new THREE.MeshBasicMaterial({
@@ -621,8 +643,32 @@ function addGroundRing(parent, baseWidth, h, accentColor) {
   ring2.rotation.x = -Math.PI / 2;
   ring2.position.y = -h / 2 - 0.085;
   parent.add(ring2);
+  pulsingRingMaterials.push({ mat: ring2Mat, base: 0.35, phase: Math.random() * Math.PI * 2 });
 
   return ring;
+}
+
+// A thin flagpole with a small pennant on some rooftops (roughly a third
+// of towers, picked randomly per building) - the kind of skyline detail
+// variety the Git City reference has, instead of every roof looking
+// identical.
+function addRoofFlag(parent, capWidth, h, accentColor) {
+  if (Math.random() > 0.35) return;
+  const poleH = 1.6 + Math.random() * 1.2;
+  const pole = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.03, 0.04, poleH, 6),
+    new THREE.MeshStandardMaterial({ color: 0x9aa2ad, roughness: 0.5, metalness: 0.4 })
+  );
+  const offsetX = (Math.random() - 0.5) * capWidth * 0.5;
+  const offsetZ = (Math.random() - 0.5) * capWidth * 0.5;
+  pole.position.set(offsetX, h / 2 + poleH / 2, offsetZ);
+  parent.add(pole);
+  const flag = new THREE.Mesh(
+    new THREE.PlaneGeometry(0.55, 0.32),
+    new THREE.MeshBasicMaterial({ color: accentColor, side: THREE.DoubleSide })
+  );
+  flag.position.set(offsetX + 0.3, h / 2 + poleH - 0.15, offsetZ);
+  parent.add(flag);
 }
 
 // Soft additive glow sprite - cheap stand-in for real bloom postprocessing
@@ -948,31 +994,125 @@ const worldEdge = Math.max(maxRadius, 20);
 // (behind the waterfall/lake), pushed well out into the fog so they read
 // as a distant backdrop instead of a close ring that clips into the
 // scene - flat-shaded cones with a lighter snow-cap cone on each peak. ----
-function buildMountainRange(radius, centerAngle, arcSpread, count) {
+// ---- PLATEAUS: broad, flat-topped mesas instead of pointed peaks - meant
+// to read as an inviting scenic destination (somewhere people would hike
+// up to) rather than a sheer, unclimbable mountain. Each one gets a green
+// terrace near the base, a switchback trail of glowing dashes climbing
+// the side, and a small lookout flag planted on the flat top. ----
+// A little car that climbs a plateau's road, separate from the main
+// road-loop cars since it follows a fixed set of waypoints instead of a
+// circle.
+const plateauCars = [];
+function buildSmallPlateauCar(color) {
+  const car = new THREE.Group();
+  const body = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.28, 0.46), new THREE.MeshStandardMaterial({ color, roughness: 0.4, metalness: 0.5 }));
+  body.position.y = 0.2;
+  car.add(body);
+  const cabin = new THREE.Mesh(new THREE.BoxGeometry(0.44, 0.2, 0.4), new THREE.MeshStandardMaterial({ color: 0x11141c }));
+  cabin.position.set(-0.04, 0.39, 0);
+  car.add(cabin);
+  const headlight = new THREE.Mesh(new THREE.SphereGeometry(0.05, 6, 6), new THREE.MeshBasicMaterial({ color: 0xfff2c0 }));
+  headlight.position.set(0.42, 0.2, 0);
+  car.add(headlight);
+  return car;
+}
+
+function buildPlateauRange(radius, centerAngle, arcSpread, count) {
   const group = new THREE.Group();
   for (let i = 0; i < count; i++) {
     const ang = centerAngle + (Math.random() - 0.5) * arcSpread;
-    const dist = radius + Math.random() * radius * 0.35;
-    const peakHeight = 50 + Math.random() * 90;
-    const peakRadius = 20 + Math.random() * 32;
-    const sides = 4 + Math.floor(Math.random() * 2);
-    const rotY = Math.random() * Math.PI;
+    const dist = radius + Math.random() * radius * 0.3;
+    const baseRadius = 26 + Math.random() * 20;
+    const plateauHeight = 34 + Math.random() * 26;
+    const topRadius = baseRadius * (0.6 + Math.random() * 0.12);
+    const sides = 6;
+    const rotY = Math.random() * Math.PI * 2;
+    const px = Math.cos(ang) * dist, pz = Math.sin(ang) * dist;
+    const baseY = plateauHeight / 2 - 3;
 
-    const geo = new THREE.ConeGeometry(peakRadius, peakHeight, sides);
-    const mat = new THREE.MeshStandardMaterial({ color: 0x1b2036, flatShading: true, roughness: 1 });
-    const mesh = new THREE.Mesh(geo, mat);
-    mesh.rotation.y = rotY;
-    mesh.position.set(Math.cos(ang) * dist, peakHeight / 2 - 4, Math.sin(ang) * dist);
-    mesh.receiveShadow = true;
-    group.add(mesh);
+    const bodyGeo = new THREE.CylinderGeometry(topRadius, baseRadius, plateauHeight, sides);
+    const bodyMat = new THREE.MeshStandardMaterial({ color: 0x394258, flatShading: true, roughness: 0.95 });
+    const body = new THREE.Mesh(bodyGeo, bodyMat);
+    body.rotation.y = rotY;
+    body.position.set(px, baseY, pz);
+    body.receiveShadow = true;
+    group.add(body);
 
-    const capH = peakHeight * 0.26;
-    const capGeo = new THREE.ConeGeometry(peakRadius * 0.4, capH, sides);
-    const capMat = new THREE.MeshStandardMaterial({ color: 0xd7e3ff, flatShading: true, roughness: 0.9 });
-    const cap = new THREE.Mesh(capGeo, capMat);
+    // Green terrace band near the base, like real mesas greening lower down.
+    const terraceH = plateauHeight * 0.18;
+    const terrace = new THREE.Mesh(
+      new THREE.CylinderGeometry(baseRadius * 0.9, baseRadius * 1.0, terraceH, sides),
+      new THREE.MeshStandardMaterial({ color: 0x2c4a30, flatShading: true, roughness: 1 })
+    );
+    terrace.rotation.y = rotY;
+    terrace.position.set(px, baseY - plateauHeight / 2 + terraceH / 2 + 1, pz);
+    group.add(terrace);
+
+    // Grassy summit instead of bare rock - a peaceful spot to land on top
+    // of, not just a functional peak.
+    const capY = baseY + plateauHeight / 2 + 0.6;
+    const cap = new THREE.Mesh(
+      new THREE.CylinderGeometry(topRadius, topRadius, 1.4, sides),
+      new THREE.MeshStandardMaterial({ color: 0x4a7a4e, flatShading: true, roughness: 0.85 })
+    );
     cap.rotation.y = rotY;
-    cap.position.set(mesh.position.x, peakHeight - capH / 2 - 4, mesh.position.z);
+    cap.position.set(px, capY, pz);
     group.add(cap);
+
+    // A handful of low-poly trees and a bench up top - the "relax" feel.
+    const grassY = capY + 0.7;
+    for (let k = 0; k < 5; k++) {
+      const tAng = Math.random() * Math.PI * 2;
+      const tRad = Math.random() * topRadius * 0.7;
+      const tx = px + Math.cos(tAng) * tRad, tz = pz + Math.sin(tAng) * tRad;
+      const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.12, 1.0, 6), new THREE.MeshStandardMaterial({ color: 0x4a3524, roughness: 0.9 }));
+      trunk.position.set(tx, grassY + 0.5, tz);
+      group.add(trunk);
+      const leaf = new THREE.Mesh(new THREE.ConeGeometry(0.75, 1.6, 7), new THREE.MeshStandardMaterial({ color: 0x1f4a2e, emissive: 0x0d2415, emissiveIntensity: 0.3, flatShading: true, roughness: 0.85 }));
+      leaf.position.set(tx, grassY + 1.5, tz);
+      group.add(leaf);
+    }
+    const bench = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.15, 0.4), new THREE.MeshStandardMaterial({ color: 0x6b4a2f, roughness: 0.8 }));
+    bench.position.set(px + topRadius * 0.35, grassY + 0.25, pz);
+    group.add(bench);
+
+    // A real road (not just decorative dashes) winding up the side - wide
+    // enough to read as drivable, with a painted centerline - and a little
+    // car climbing it on a loop.
+    const roadPoints = [];
+    const roadSteps = 22;
+    for (let t = 0; t <= roadSteps; t++) {
+      const tProg = t / roadSteps;
+      const ry = baseY - plateauHeight / 2 + tProg * plateauHeight;
+      const rr = baseRadius - tProg * (baseRadius - topRadius) + 0.6;
+      const rAng = rotY + tProg * Math.PI * 1.4;
+      const rx = px + Math.cos(rAng) * rr, rz = pz + Math.sin(rAng) * rr;
+      roadPoints.push(new THREE.Vector3(rx, ry + 0.15, rz));
+      if (t < roadSteps) {
+        const seg = new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.16, 1.4), new THREE.MeshStandardMaterial({ color: 0x2c2e34, roughness: 0.95 }));
+        seg.position.set(rx, ry, rz);
+        seg.rotation.y = rAng;
+        group.add(seg);
+        const stripe = new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.17, 0.12), new THREE.MeshBasicMaterial({ color: 0xffe9a8, transparent: true, opacity: 0.5 }));
+        stripe.position.set(rx, ry + 0.01, rz);
+        stripe.rotation.y = rAng;
+        group.add(stripe);
+      }
+    }
+    const plateauCar = buildSmallPlateauCar(i % 2 === 0 ? 0xff5b5b : 0x5bb3ff);
+    group.add(plateauCar);
+    plateauCars.push({ car: plateauCar, points: roadPoints, t: Math.random(), speed: 0.05 + Math.random() * 0.025 });
+
+    // A small lookout flag on top marking it as a place worth visiting.
+    const pole = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.12, 0.12, 3, 6),
+      new THREE.MeshStandardMaterial({ color: 0x8a8f9a, roughness: 0.5, metalness: 0.4 })
+    );
+    pole.position.set(px, capY + 2.2, pz);
+    group.add(pole);
+    const flag = new THREE.Mesh(new THREE.PlaneGeometry(1.4, 0.8), new THREE.MeshBasicMaterial({ color: 0xff5f5f, side: THREE.DoubleSide }));
+    flag.position.set(px + 0.75, pole.position.y + 1.1, pz);
+    group.add(flag);
   }
   scene.add(group);
 }
@@ -981,11 +1121,9 @@ function buildMountainRange(radius, centerAngle, arcSpread, count) {
 // same angle as the waterfall/lake (4.4) with a 55-degree-wide arc, so
 // they form one distant backdrop instead of surrounding the whole scene.
 // NOTE: scene.fog is FogExp2 with density 0.013 - its squared falloff means
-// anything past ~100 units is already fogged to fully invisible. The
-// previous distance (250+) put the mountains completely behind that wall,
-// which is why they weren't showing up at all. Capped here so they always
-// land in the "distant hazy silhouette" zone instead of past it.
-buildMountainRange(Math.min(Math.max(worldEdge * 1.2, 55) + 30, 95), 4.4, Math.PI * 0.3, 20);
+// anything past ~100 units is already fogged to fully invisible. Capped
+// here so they always land in the "distant but visible" zone.
+buildPlateauRange(Math.min(Math.max(worldEdge * 1.2, 55) + 30, 95), 4.4, Math.PI * 0.3, 7);
 
 // ---- SHOPPING MALL: a fixed landmark (not tied to any memory) - a wide
 // glassy box with a baked neon "MALL" marquee sign, entrance canopy, and
@@ -1650,6 +1788,45 @@ function animate() {
     const dz = (forwardZ * -joystickVec.y + rightZ * joystickVec.x) * moveSpeed;
     lookAtTarget.x += dx; lookAtTarget.z += dz;
     lookAtGoal.x += dx; lookAtGoal.z += dz;
+  }
+
+  // Ground rings pulse gently (each with its own random phase so they
+  // don't all breathe in lockstep) - reinforces the up/down energy motif
+  // down at the base of every tower, not just on the facade/beam.
+  const pulseT = performance.now() * 0.0022;
+  for (let i = 0; i < pulsingRingMaterials.length; i++) {
+    const p = pulsingRingMaterials[i];
+    p.mat.opacity = p.base * (0.65 + 0.35 * Math.sin(pulseT + p.phase));
+  }
+
+  // Laser scan rings travel up and down each tower's body on a loop -
+  // sin() maps smoothly to [0,1] so the ring eases at the top/bottom
+  // instead of snapping back.
+  for (let i = 0; i < scanRingEntries.length; i++) {
+    const s = scanRingEntries[i];
+    const t = Math.sin(performance.now() * 0.001 * s.speed + s.phase) * 0.5 + 0.5;
+    s.ring.position.y = -s.h / 2 + t * s.h;
+  }
+
+  // Plateau cars climb their fixed waypoint road, ping-ponging between
+  // the base and the summit instead of just circling like the ring-road
+  // cars.
+  for (let i = 0; i < plateauCars.length; i++) {
+    const pc = plateauCars[i];
+    pc.t += pc.speed * 0.01 * (pc.dir || 1);
+    if (pc.t >= 1) { pc.t = 1; pc.dir = -1; }
+    if (pc.t <= 0) { pc.t = 0; pc.dir = 1; }
+    const pts = pc.points;
+    const fIdx = pc.t * (pts.length - 1);
+    const i0 = Math.floor(fIdx), i1 = Math.min(pts.length - 1, i0 + 1);
+    const frac = fIdx - i0;
+    const p0 = pts[i0], p1 = pts[i1];
+    pc.car.position.set(
+      p0.x + (p1.x - p0.x) * frac,
+      p0.y + (p1.y - p0.y) * frac,
+      p0.z + (p1.z - p0.z) * frac
+    );
+    pc.car.rotation.y = Math.atan2(p1.x - p0.x, p1.z - p0.z) + (pc.dir < 0 ? Math.PI : 0);
   }
 
   renderer.render(scene, camera);
