@@ -570,20 +570,20 @@ function addRoofDetails(parent, key, baseWidth, capWidth, h, accentColor) {
 function addRooftopBeam(parent, capWidth, h, accentColor) {
   const beamHeight = Math.max(24, h * 1.6);
 
-  const beamGeo = new THREE.CylinderGeometry(0.05 * capWidth + 0.05, 0.08 * capWidth + 0.09, beamHeight, 12, 1, true);
+  const beamGeo = new THREE.CylinderGeometry(0.16 * capWidth + 0.14, 0.24 * capWidth + 0.22, beamHeight, 16, 1, true);
   const beamMat = new THREE.MeshBasicMaterial({
     map: beamTexture, color: new THREE.Color(accentColor),
-    transparent: true, opacity: 0.6, depthWrite: false,
+    transparent: true, opacity: 0.85, depthWrite: false,
     blending: THREE.AdditiveBlending, side: THREE.DoubleSide,
   });
   const beam = new THREE.Mesh(beamGeo, beamMat);
   beam.position.y = h / 2 + beamHeight / 2 + 0.15;
   parent.add(beam);
 
-  const coreGeo = new THREE.CylinderGeometry(0.016 * capWidth + 0.02, 0.024 * capWidth + 0.03, beamHeight * 0.94, 8, 1, true);
+  const coreGeo = new THREE.CylinderGeometry(0.05 * capWidth + 0.06, 0.075 * capWidth + 0.09, beamHeight * 0.94, 12, 1, true);
   const coreMat = new THREE.MeshBasicMaterial({
     map: beamTexture, color: 0xffffff,
-    transparent: true, opacity: 0.85, depthWrite: false,
+    transparent: true, opacity: 1.0, depthWrite: false,
     blending: THREE.AdditiveBlending, side: THREE.DoubleSide,
   });
   const core = new THREE.Mesh(coreGeo, coreMat);
@@ -1123,7 +1123,8 @@ function buildPlateauRange(radius, centerAngle, arcSpread, count) {
 // NOTE: scene.fog is FogExp2 with density 0.013 - its squared falloff means
 // anything past ~100 units is already fogged to fully invisible. Capped
 // here so they always land in the "distant but visible" zone.
-buildPlateauRange(Math.min(Math.max(worldEdge * 1.2, 55) + 30, 95), 4.4, Math.PI * 0.3, 7);
+// Mountain/plateau range removed per request - function kept unused above
+// in case it's wanted again later, but no longer invoked.
 
 // ---- SHOPPING MALL: a fixed landmark (not tied to any memory) - a wide
 // glassy box with a baked neon "MALL" marquee sign, entrance canopy, and
@@ -1198,7 +1199,7 @@ buildShoppingMall(Math.cos(0.0) * (worldEdge + 14), Math.sin(0.0) * (worldEdge +
 
 // ---- STREET LAMPS: warm little lamp-posts on two rings through the
 // city, each with its own soft point light + glow sprite. ----
-function addStreetLamp(x, z) {
+function addStreetLamp(x, z, facingAngle) {
   const group = new THREE.Group();
   const poleH = 3.2;
   const poleMat = new THREE.MeshStandardMaterial({ color: 0x2a2e38, roughness: 0.6, metalness: 0.4 });
@@ -1221,9 +1222,16 @@ function addStreetLamp(x, z) {
   light.position.copy(lamp.position);
   group.add(light);
 
+  // Rotate the whole lamp so its arm/head faces the city center rather than
+  // a fixed world direction - without this every lamp on the far side of
+  // the ring had its lit head pointing away from the road.
+  group.rotation.y = facingAngle;
   group.position.set(x, 0, z);
   scene.add(group);
-  addGlowSprite(new THREE.Vector3(x + lamp.position.x, lamp.position.y, z), 0xffc873, 1.3);
+
+  const worldOffsetX = lamp.position.x * Math.cos(facingAngle);
+  const worldOffsetZ = -lamp.position.x * Math.sin(facingAngle);
+  addGlowSprite(new THREE.Vector3(x + worldOffsetX, lamp.position.y, z + worldOffsetZ), 0xffc873, 1.3);
 }
 
 {
@@ -1235,7 +1243,7 @@ function addStreetLamp(x, z) {
     const count = 10 + ri * 4;
     for (let i = 0; i < count; i++) {
       const ang = (i / count) * Math.PI * 2 + ri * 0.3;
-      addStreetLamp(Math.cos(ang) * r, Math.sin(ang) * r);
+      addStreetLamp(Math.cos(ang) * r, Math.sin(ang) * r, ang + Math.PI);
     }
   });
 }
