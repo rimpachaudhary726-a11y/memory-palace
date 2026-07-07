@@ -28,6 +28,11 @@
     background:rgba(10,10,20,0.7); color:#f1f1f1; border:1px solid rgba(255,255,255,0.25);
     border-radius:20px; padding:8px 14px; font-size:13px; font-family:sans-serif;
   }
+  #flightModeBtn {
+    position:fixed; top:14px; left:14px; z-index:20;
+    background:rgba(10,10,20,0.7); color:#f1f1f1; border:1px solid rgba(255,255,255,0.25);
+    border-radius:20px; padding:8px 14px; font-size:13px; font-family:sans-serif;
+  }
   #joystick {
     position:fixed; left:24px; bottom:24px; width:110px; height:110px;
     border-radius:50%; background:rgba(255,255,255,0.08);
@@ -38,6 +43,12 @@
     margin-left:-23px; margin-top:-23px; border-radius:50%;
     background:rgba(255,255,255,0.35); border:1px solid rgba(255,255,255,0.55);
   }
+  #minimap {
+    position:fixed; right:14px; bottom:24px; width:104px; height:104px;
+    border-radius:50%; pointer-events:none; z-index:20;
+    border:1px solid rgba(255,255,255,0.28);
+    background:rgba(6,10,26,0.55);
+  }
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 </head>
@@ -46,7 +57,9 @@
 <div id="status">loading Three.js...</div>
 <div id="label"></div>
 <button id="dayNightBtn">&#127769; Night</button>
+<button id="flightModeBtn">&#9992;&#65039; Fly</button>
 <div id="joystick"><div id="joystickKnob"></div></div>
+<canvas id="minimap" width="130" height="130"></canvas>
 <script>
 window.addEventListener('error', function(e) {
   const el = document.getElementById('status');
@@ -93,6 +106,41 @@ let nightSkyTex;
   grad.addColorStop(1, '#0a1230');
   ctx.fillStyle = grad;
   ctx.fillRect(0, 0, skyW, skyH);
+
+  // Aurora borealis - wavy vertical curtains of light rising from near the
+  // horizon, painted as many thin gradient columns whose height follows a
+  // layered sine wave (so the top edge ripples like real aurora instead of
+  // a flat band). 'lighter' composite mode makes overlapping streaks glow
+  // brighter where they cross, like the reference photo, instead of just
+  // tinting flat.
+  {
+    const horizonY = skyH * 0.66;
+    ctx.save();
+    ctx.globalCompositeOperation = 'lighter';
+    const auroraLayers = [
+      { rgb: [90, 255, 170], baseAlpha: 0.5, freq: 0.018, phase: 0.0, ampMul: 1.0 },
+      { rgb: [60, 220, 190], baseAlpha: 0.34, freq: 0.026, phase: 2.1, ampMul: 0.82 },
+      { rgb: [140, 190, 255], baseAlpha: 0.16, freq: 0.014, phase: 4.4, ampMul: 0.55 },
+    ];
+    auroraLayers.forEach(layer => {
+      const [r, g, b] = layer.rgb;
+      const step = 4;
+      for (let x = 0; x <= skyW; x += step) {
+        const n = Math.sin(x * layer.freq + layer.phase) * 0.5
+                + Math.sin(x * layer.freq * 2.3 + layer.phase * 1.7) * 0.25 + 0.5;
+        const norm = Math.max(0, Math.min(1, n));
+        const streakH = skyH * 0.42 * layer.ampMul * (0.3 + 0.7 * norm);
+        const topY = horizonY - streakH;
+        const streakGrad = ctx.createLinearGradient(0, horizonY, 0, topY);
+        streakGrad.addColorStop(0, `rgba(${r},${g},${b},${layer.baseAlpha * 0.12})`);
+        streakGrad.addColorStop(0.35, `rgba(${r},${g},${b},${layer.baseAlpha})`);
+        streakGrad.addColorStop(1, `rgba(${r},${g},${b},0)`);
+        ctx.fillStyle = streakGrad;
+        ctx.fillRect(x, topY, step + 1, streakH);
+      }
+    });
+    ctx.restore();
+  }
 
   // Soft glowing moon
   const moonX = skyW * 0.74, moonY = skyH * 0.22, moonR = 16;
@@ -183,7 +231,23 @@ let camThetaGoal = camTheta, camPhiGoal = camPhi;
 let lookAtTarget = new THREE.Vector3(0, 3, 0);
 let lookAtGoal = lookAtTarget.clone();
 
+// Fly mode: a free-flight camera (position moves through space rather than
+// orbiting a fixed target). Reuses camTheta/camPhi as yaw/pitch (drag to
+// look, same as orbit mode) and camThetaGoal/camPhiGoal for the same
+// eased-rotation feel, so the "look" controls feel identical between modes
+// - only what the rotation angles DO (orbit vs. steer) changes.
+let flightMode = false;
+let flightPos = new THREE.Vector3(0, 20, 40);
+
 function updateCamera() {
+  if (flightMode) {
+    const fx = -Math.sin(camPhi) * Math.sin(camTheta);
+    const fy = -Math.cos(camPhi);
+    const fz = -Math.sin(camPhi) * Math.cos(camTheta);
+    camera.position.copy(flightPos);
+    camera.lookAt(flightPos.x + fx, flightPos.y + fy, flightPos.z + fz);
+    return;
+  }
   camPhi = Math.max(0.15, Math.min(1.5, camPhi));
   camDistance = Math.max(6, Math.min(320, camDistance));
   camera.position.x = lookAtTarget.x + camDistance * Math.sin(camPhi) * Math.sin(camTheta);
@@ -604,15 +668,29 @@ function addRooftopBeam(parent, capWidth, h, accentColor) {
 const scanRingEntries = [];
 function addScanRing(parent, footprint, h, accentColor) {
   const ringRadius = footprint * 0.62 + 0.15;
-  const geo = new THREE.TorusGeometry(ringRadius, 0.06, 8, 32);
+
+  const geo = new THREE.TorusGeometry(ringRadius, 0.16, 10, 32);
   const mat = new THREE.MeshBasicMaterial({
-    color: new THREE.Color(accentColor), transparent: true, opacity: 0.85,
+    color: new THREE.Color(accentColor), transparent: true, opacity: 0.9,
     blending: THREE.AdditiveBlending, depthWrite: false,
   });
   const ring = new THREE.Mesh(geo, mat);
   ring.rotation.x = Math.PI / 2; // lie flat so it encircles the vertical tower
   parent.add(ring);
-  scanRingEntries.push({ ring, h, phase: Math.random() * Math.PI * 2, speed: 0.35 + Math.random() * 0.25 });
+
+  // Thin bright white core layered on top of the colored band, same trick
+  // used on the rooftop beams - gives the ring a denser, hot-center glow
+  // instead of one flat translucent color.
+  const coreGeo = new THREE.TorusGeometry(ringRadius, 0.05, 8, 32);
+  const coreMat = new THREE.MeshBasicMaterial({
+    color: 0xffffff, transparent: true, opacity: 0.95,
+    blending: THREE.AdditiveBlending, depthWrite: false,
+  });
+  const core = new THREE.Mesh(coreGeo, coreMat);
+  core.rotation.x = Math.PI / 2;
+  parent.add(core);
+
+  scanRingEntries.push({ ring, core, h, phase: Math.random() * Math.PI * 2, speed: 0.35 + Math.random() * 0.25 });
 }
 
 const pulsingRingMaterials = [];
@@ -1234,19 +1312,9 @@ function addStreetLamp(x, z, facingAngle) {
   addGlowSprite(new THREE.Vector3(x + worldOffsetX, lamp.position.y, z + worldOffsetZ), 0xffc873, 1.3);
 }
 
-{
-  // Both rings sit OUTSIDE the tower-filled disc (which runs from radius 0
-  // to worldEdge, densely packed by the golden-angle spiral) so lamps line
-  // the approach to the road/landmarks instead of clipping through towers.
-  const lampRings = [worldEdge + 6, worldEdge + 13];
-  lampRings.forEach((r, ri) => {
-    const count = 10 + ri * 4;
-    for (let i = 0; i < count; i++) {
-      const ang = (i / count) * Math.PI * 2 + ri * 0.3;
-      addStreetLamp(Math.cos(ang) * r, Math.sin(ang) * r, ang + Math.PI);
-    }
-  });
-}
+// Street lamp placement removed per request (assumed to be the "traffic
+// light" objects referred to - the glowing orbs on poles along the road).
+// addStreetLamp() is kept defined above, unused, in case it's wanted back.
 
 // ---- PARK: a grove of low-poly pine trees on a lawn patch, using
 // InstancedMesh so the whole grove is only two draw calls. ----
@@ -1421,7 +1489,8 @@ function buildWaterfall(x, z, cliffHeight) {
   group.lookAt(0, 0, 0);
   scene.add(group);
 }
-buildWaterfall(Math.cos(4.4) * (worldEdge + 42), Math.sin(4.4) * (worldEdge + 42), 70);
+// Waterfall/cliff mountain removed per request - function kept unused
+// above in case it's wanted again later, but no longer invoked.
 
 // ---- RING ROAD + CARS: a loop road around the outside of the tower
 // cluster (past the memory towers, tying the mall/park/lake together),
@@ -1451,7 +1520,12 @@ function buildRingRoad(radius) {
 const roadCars = [];
 function addCar(radius, angle, speed, color) {
   const car = new THREE.Group();
-  const bodyMat = new THREE.MeshStandardMaterial({ color, roughness: 0.35, metalness: 0.6 });
+  // Glossy clearcoat paint (picks up the sky/environment reflection like
+  // the building glass does) instead of a flat matte body - reads as much
+  // more "designed" up close or when a car passes near the camera.
+  const bodyMat = new THREE.MeshPhysicalMaterial({
+    color, roughness: 0.22, metalness: 0.55, clearcoat: 1.0, clearcoatRoughness: 0.08,
+  });
   const body = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.3, 0.5), bodyMat);
   body.position.y = 0.22;
   car.add(body);
@@ -1460,13 +1534,27 @@ function addCar(radius, angle, speed, color) {
   const cabin = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.22, 0.44), new THREE.MeshStandardMaterial({ color: 0x11141c, roughness: 0.2, metalness: 0.3 }));
   cabin.position.set(-0.05, 0.44, 0);
   car.add(cabin);
-  const glassMat = new THREE.MeshStandardMaterial({ color: 0x9fd9ff, transparent: true, opacity: 0.55, roughness: 0.1, metalness: 0.4 });
+  const glassMat = new THREE.MeshPhysicalMaterial({
+    color: 0x9fd9ff, transparent: true, opacity: 0.6, roughness: 0.05, metalness: 0.3,
+    clearcoat: 1.0, clearcoatRoughness: 0.05,
+  });
   const windowL = new THREE.Mesh(new THREE.BoxGeometry(0.36, 0.14, 0.02), glassMat);
   windowL.position.set(-0.05, 0.46, 0.225);
   car.add(windowL);
   const windowR = windowL.clone();
   windowR.position.z = -0.225;
   car.add(windowR);
+
+  // Front windshield, slightly raked - the cabin previously had side glass
+  // only, so it looked windowless from the front/back.
+  const windshield = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.19, 0.4), glassMat);
+  windshield.position.set(0.18, 0.42, 0);
+  windshield.rotation.z = -0.35;
+  car.add(windshield);
+  const rearWindow = windshield.clone();
+  rearWindow.position.set(-0.28, 0.42, 0);
+  rearWindow.rotation.z = 0.35;
+  car.add(rearWindow);
 
   // Four wheels, dark rubber with a small hubcap disc.
   const wheelMat = new THREE.MeshStandardMaterial({ color: 0x0c0c0e, roughness: 0.8 });
@@ -1503,6 +1591,7 @@ function addCar(radius, angle, speed, color) {
   taillightL.position.z = -0.16;
   car.add(taillightL);
 
+  car.scale.set(1.35, 1.35, 1.35);
   scene.add(car);
   roadCars.push({ car, radius, angle, speed });
 }
@@ -1513,6 +1602,88 @@ buildRingRoad(roadRadius);
   const carColors = [0xff5b5b, 0x5bb3ff, 0xffd75b, 0x8be36b];
   for (let i = 0; i < 8; i++) {
     addCar(roadRadius, (i / 8) * Math.PI * 2, (i % 2 === 0 ? 1 : -1) * (0.08 + Math.random() * 0.05), carColors[i % carColors.length]);
+  }
+}
+
+// ---- HOT AIR BALLOONS: drift through the sky on the same kind of looping
+// path as the road cars, just up at altitude instead of on the ground.
+// Envelope uses a baked vertical-gore-stripe texture (alternating colors
+// running pole-to-pole) rather than lit materials, so it reads clearly as
+// a classic striped balloon in both day and night mode. ----
+function buildBalloonEnvelopeTexture(colorA, colorB) {
+  const w = 128, h = 16;
+  const canvas = document.createElement('canvas');
+  canvas.width = w; canvas.height = h;
+  const ctx = canvas.getContext('2d');
+  const gores = 10;
+  for (let i = 0; i < gores; i++) {
+    ctx.fillStyle = i % 2 === 0 ? colorA : colorB;
+    ctx.fillRect((i / gores) * w, 0, w / gores + 1, h);
+  }
+  const tex = new THREE.CanvasTexture(canvas);
+  tex.wrapS = THREE.RepeatWrapping;
+  return tex;
+}
+
+const balloonEntries = [];
+function addHotAirBalloon(radius, angle, speed, baseY, colorA, colorB) {
+  const group = new THREE.Group();
+  const envelopeTex = buildBalloonEnvelopeTexture(colorA, colorB);
+  const envelope = new THREE.Mesh(
+    new THREE.SphereGeometry(1.3, 20, 16),
+    new THREE.MeshBasicMaterial({ map: envelopeTex })
+  );
+  envelope.scale.set(1, 1.25, 1);
+  envelope.position.y = 2.6;
+  group.add(envelope);
+
+  // Basket + connecting ropes
+  const basketMat = new THREE.MeshStandardMaterial({ color: 0x7a4a2a, roughness: 0.85 });
+  const basket = new THREE.Mesh(new THREE.CylinderGeometry(0.42, 0.5, 0.5, 8), basketMat);
+  basket.position.y = 0.25;
+  group.add(basket);
+
+  const ropeMat = new THREE.MeshStandardMaterial({ color: 0x3a3228, roughness: 0.9 });
+  const ropeTop = 0.98, ropeBottom = 0.5;
+  [[0.35, 0.35], [0.35, -0.35], [-0.35, 0.35], [-0.35, -0.35]].forEach(([rx, rz]) => {
+    const rope = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.02, ropeTop - ropeBottom, 4), ropeMat);
+    rope.position.set(rx * 0.45, (ropeTop + ropeBottom) / 2, rz * 0.45);
+    group.add(rope);
+  });
+
+  // Small warm glow at the basket opening, like a burner flame. Built
+  // directly here (not via addGlowSprite) and added to the balloon's own
+  // group, so it travels with the balloon instead of staying fixed in
+  // world space where addGlowSprite would otherwise plant it.
+  const flame = new THREE.PointLight(0xffaa55, 0.5, 3);
+  flame.position.set(0, 0.55, 0);
+  group.add(flame);
+  const flameGlowMat = new THREE.SpriteMaterial({
+    map: glowTexture, color: new THREE.Color(0xffaa55),
+    transparent: true, opacity: 0.55, depthWrite: false, blending: THREE.AdditiveBlending,
+  });
+  const flameGlow = new THREE.Sprite(flameGlowMat);
+  flameGlow.position.set(0, 0.55, 0);
+  flameGlow.scale.set(0.9, 0.9, 1);
+  group.add(flameGlow);
+
+  group.position.set(Math.cos(angle) * radius, baseY, Math.sin(angle) * radius);
+  scene.add(group);
+  balloonEntries.push({ group, radius, angle, speed, baseY, bobPhase: Math.random() * Math.PI * 2 });
+}
+
+{
+  const balloonPairs = [[0xff5b7a, 0xfff2c0], [0x5bd3ff, 0xffffff], [0xffd75b, 0xff8b5b], [0x8be36b, 0xfff2c0]];
+  const balloonAltitude = Math.max(48, worldEdge * 0.55);
+  for (let i = 0; i < 4; i++) {
+    const [ca, cb] = balloonPairs[i % balloonPairs.length];
+    addHotAirBalloon(
+      roadRadius * (0.35 + Math.random() * 0.45),
+      (i / 4) * Math.PI * 2 + Math.random() * 0.6,
+      (i % 2 === 0 ? 1 : -1) * (0.04 + Math.random() * 0.02),
+      balloonAltitude + Math.random() * 8,
+      ca, cb
+    );
   }
 }
 
@@ -1635,7 +1806,7 @@ renderer.domElement.addEventListener('pointermove', (e) => {
   if (Math.abs(dx) > 3 || Math.abs(dy) > 3) dragMoved = true;
   camThetaGoal -= dx * 0.012;
   camPhiGoal -= dy * 0.012;
-  camPhiGoal = Math.max(0.15, Math.min(1.5, camPhiGoal));
+  camPhiGoal = flightMode ? Math.max(0.1, Math.min(3.05, camPhiGoal)) : Math.max(0.15, Math.min(1.5, camPhiGoal));
   lastX = e.clientX;
   lastY = e.clientY;
 });
@@ -1672,6 +1843,27 @@ renderer.domElement.addEventListener('wheel', (e) => {
 }, { passive: true });
 
 document.getElementById('dayNightBtn').addEventListener('click', () => setDayMode(!isDaytime));
+
+// Switches between the normal orbit/walk camera and a free-flight camera.
+// Entering flight mode starts from wherever the camera currently is (no
+// jarring teleport); leaving it drops the orbit target to the ground
+// beneath the flight position so normal mode resumes somewhere sensible
+// instead of snapping back to the city center.
+function setFlightMode(on) {
+  flightMode = on;
+  const btn = document.getElementById('flightModeBtn');
+  if (on) {
+    flightPos.copy(camera.position);
+    btn.innerHTML = '&#128694; Normal';
+  } else {
+    lookAtTarget.set(flightPos.x, Math.max(2, flightPos.y * 0.3), flightPos.z);
+    lookAtGoal.copy(lookAtTarget);
+    camDistance = 22;
+    camDistanceGoal = 22;
+    btn.innerHTML = '&#9992;&#65039; Fly';
+  }
+}
+document.getElementById('flightModeBtn').addEventListener('click', () => setFlightMode(!flightMode));
 
 // On-screen joystick - drags the knob within its base, and while held
 // pans lookAtTarget/lookAtGoal (and so the whole camera rig) across the
@@ -1726,10 +1918,72 @@ joystickEl.addEventListener('pointerup', (e) => {
 });
 joystickEl.addEventListener('pointercancel', resetJoystick);
 
+// ---- MINIMAP: a small top-down plan view in the corner, Git City style -
+// every building plotted as a dot (clamped to the disc edge if it's
+// further out than the map's radius, so nothing just vanishes), a white
+// heading arrow showing which way the camera is currently facing, and a
+// fixed "N" compass label. Centered on lookAtTarget (the point the camera
+// orbits/walks around) rather than world origin, so the map re-centers as
+// you move instead of only being useful from the starting spot. ----
+const minimapCanvas = document.getElementById('minimap');
+const minimapCtx = minimapCanvas.getContext('2d');
+const MM_SIZE = minimapCanvas.width;
+const MM_R = MM_SIZE / 2 - 6;
+const MM_WORLD_R = Math.max(maxRadius, worldEdge) + 26;
+
+function drawMinimap() {
+  const ctx = minimapCtx;
+  ctx.clearRect(0, 0, MM_SIZE, MM_SIZE);
+  const cx = MM_SIZE / 2, cy = MM_SIZE / 2;
+  const scale = MM_R / MM_WORLD_R;
+  const centerWX = lookAtTarget.x, centerWZ = lookAtTarget.z;
+
+  BUILDINGS.forEach(b => {
+    let dx = (b.position.x - centerWX) * scale;
+    let dz = (b.position.z - centerWZ) * scale;
+    const dist = Math.hypot(dx, dz);
+    if (dist > MM_R) { const k = MM_R / dist; dx *= k; dz *= k; }
+    ctx.beginPath();
+    ctx.arc(cx + dx, cy + dz, b.index === selectedIndex ? 3 : 1.8, 0, Math.PI * 2);
+    ctx.globalAlpha = b.index === selectedIndex ? 1 : 0.85;
+    ctx.fillStyle = b.accent;
+    ctx.fill();
+  });
+  ctx.globalAlpha = 1;
+
+  // Heading arrow - points the direction the camera is currently looking.
+  ctx.save();
+  ctx.translate(cx, cy);
+  ctx.rotate(-camTheta);
+  ctx.beginPath();
+  ctx.moveTo(0, -9);
+  ctx.lineTo(-5, 3);
+  ctx.lineTo(0, 0.5);
+  ctx.lineTo(5, 3);
+  ctx.closePath();
+  ctx.fillStyle = 'rgba(255,255,255,0.9)';
+  ctx.fill();
+  ctx.restore();
+
+  // Player/center marker
+  ctx.beginPath();
+  ctx.arc(cx, cy, 2.4, 0, Math.PI * 2);
+  ctx.fillStyle = '#ffffff';
+  ctx.fill();
+
+  // Fixed compass label - doesn't rotate with the view
+  ctx.fillStyle = 'rgba(255,255,255,0.75)';
+  ctx.font = 'bold 11px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('N', cx, 10);
+}
+
 let firstFrameRendered = false;
 function animate() {
   requestAnimationFrame(animate);
   stepCameraTowardGoal();
+  drawMinimap();
 
   // Drift the ambient light motes gently upward, looping back to the
   // ground once they clear the tallest tower, instead of a static sprinkle.
@@ -1785,17 +2039,43 @@ function animate() {
     rc.car.rotation.y = -rc.angle + (rc.speed > 0 ? Math.PI / 2 : -Math.PI / 2);
   }
 
+  // Balloons drift the same way cars do (slow circular loop) but also bob
+  // gently up and down on a sine wave, and rotate slowly on their own axis
+  // so the stripe pattern isn't static from a fixed camera angle.
+  for (let i = 0; i < balloonEntries.length; i++) {
+    const be = balloonEntries[i];
+    be.angle += be.speed * 0.01;
+    const bob = Math.sin(performance.now() * 0.0006 + be.bobPhase) * 1.6;
+    be.group.position.set(Math.cos(be.angle) * be.radius, be.baseY + bob, Math.sin(be.angle) * be.radius);
+    be.group.rotation.y += 0.002;
+  }
+
   // Joystick pans the camera rig across the ground - forward/back and
   // strafe are computed from the camera's current heading (camTheta) so
-  // "up" on the stick always means "the direction currently faced."
+  // "up" on the stick always means "the direction currently faced." In
+  // flight mode the same stick also moves vertically (climb/dive) based on
+  // the current look pitch (camPhi), so looking up and pushing forward
+  // makes you climb, like a plane.
   if (Math.abs(joystickVec.x) > 0.02 || Math.abs(joystickVec.y) > 0.02) {
-    const moveSpeed = 0.5;
-    const forwardX = -Math.sin(camTheta), forwardZ = -Math.cos(camTheta);
-    const rightX = -forwardZ, rightZ = forwardX;
-    const dx = (forwardX * -joystickVec.y + rightX * joystickVec.x) * moveSpeed;
-    const dz = (forwardZ * -joystickVec.y + rightZ * joystickVec.x) * moveSpeed;
-    lookAtTarget.x += dx; lookAtTarget.z += dz;
-    lookAtGoal.x += dx; lookAtGoal.z += dz;
+    if (flightMode) {
+      const speed = 0.85;
+      const fx = -Math.sin(camPhi) * Math.sin(camTheta);
+      const fy = -Math.cos(camPhi);
+      const fz = -Math.sin(camPhi) * Math.cos(camTheta);
+      const rightX = Math.cos(camTheta), rightZ = -Math.sin(camTheta);
+      flightPos.x += (fx * -joystickVec.y + rightX * joystickVec.x) * speed;
+      flightPos.y += (fy * -joystickVec.y) * speed;
+      flightPos.z += (fz * -joystickVec.y + rightZ * joystickVec.x) * speed;
+      flightPos.y = Math.max(2, flightPos.y);
+    } else {
+      const moveSpeed = 0.5;
+      const forwardX = -Math.sin(camTheta), forwardZ = -Math.cos(camTheta);
+      const rightX = -forwardZ, rightZ = forwardX;
+      const dx = (forwardX * -joystickVec.y + rightX * joystickVec.x) * moveSpeed;
+      const dz = (forwardZ * -joystickVec.y + rightZ * joystickVec.x) * moveSpeed;
+      lookAtTarget.x += dx; lookAtTarget.z += dz;
+      lookAtGoal.x += dx; lookAtGoal.z += dz;
+    }
   }
 
   // Ground rings pulse gently (each with its own random phase so they
@@ -1813,7 +2093,9 @@ function animate() {
   for (let i = 0; i < scanRingEntries.length; i++) {
     const s = scanRingEntries[i];
     const t = Math.sin(performance.now() * 0.001 * s.speed + s.phase) * 0.5 + 0.5;
-    s.ring.position.y = -s.h / 2 + t * s.h;
+    const y = -s.h / 2 + t * s.h;
+    s.ring.position.y = y;
+    s.core.position.y = y;
   }
 
   // Plateau cars climb their fixed waypoint road, ping-ponging between
