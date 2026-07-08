@@ -33,6 +33,11 @@
     background:rgba(10,10,20,0.7); color:#f1f1f1; border:1px solid rgba(255,255,255,0.25);
     border-radius:20px; padding:8px 14px; font-size:13px; font-family:sans-serif;
   }
+  #gfxQualityBtn {
+    position:fixed; top:60px; left:14px; z-index:20;
+    background:rgba(10,10,20,0.7); color:#f1f1f1; border:1px solid rgba(255,255,255,0.25);
+    border-radius:20px; padding:8px 14px; font-size:13px; font-family:sans-serif;
+  }
   #joystick {
     position:fixed; left:24px; bottom:24px; width:110px; height:110px;
     border-radius:50%; background:rgba(255,255,255,0.08);
@@ -66,6 +71,7 @@
 <div id="label"></div>
 <button id="dayNightBtn">&#127769; Night</button>
 <button id="flightModeBtn">&#9992;&#65039; Fly</button>
+<button id="gfxQualityBtn">&#127918; Graphics: Medium</button>
 <div id="joystick"><div id="joystickKnob"></div></div>
 <button id="altUpBtn">&#9650;</button>
 <button id="altDownBtn">&#9660;</button>
@@ -93,6 +99,12 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 document.body.appendChild(renderer.domElement);
+
+// Quality-tunable globals - set for real once applyGraphicsQuality() runs
+// after the scene/lights/beams exist; these starting values just avoid
+// undefined reads if a firework somehow fires before that.
+let FIREWORK_BURST_COUNT = 48;
+let FIREWORK_TEXT_MAX_POINTS = 140;
 
 // Night sky dome - a richer gradient with a visible glowing moon, painted
 // onto one equirectangular canvas (also reused as scene.environment so
@@ -255,10 +267,31 @@ function updateCamera() {
     const fx = -Math.sin(camPhi) * Math.sin(camTheta);
     const fy = -Math.cos(camPhi);
     const fz = -Math.sin(camPhi) * Math.cos(camTheta);
-    camera.position.copy(flightPos);
-    camera.lookAt(flightPos.x + fx, flightPos.y + fy, flightPos.z + fz);
+
+    if (playerPlane) {
+      playerPlane.visible = true;
+      playerPlane.position.copy(flightPos);
+      // Orient the plane to face the flight direction. lookAt() points the
+      // object's local +Z at the target by default, but the fuselage was
+      // built along local +X (nose at +X), so compensate with a -90deg
+      // yaw offset after aiming, keeping the nose pointed the right way.
+      playerPlane.lookAt(flightPos.x - fx, flightPos.y - fy, flightPos.z - fz);
+      playerPlane.rotateY(-Math.PI / 2);
+    }
+
+    // Chase camera: trails behind and slightly above the plane instead of
+    // being the plane's own eyepoint - so you can actually see the plane
+    // you're flying, not just an empty first-person view.
+    const chaseDist = 8, chaseHeight = 2.6;
+    camera.position.set(
+      flightPos.x - fx * chaseDist,
+      flightPos.y - fy * chaseDist + chaseHeight,
+      flightPos.z - fz * chaseDist
+    );
+    camera.lookAt(flightPos.x + fx * 4, flightPos.y + fy * 4, flightPos.z + fz * 4);
     return;
   }
+  if (playerPlane) playerPlane.visible = false;
   camPhi = Math.max(0.15, Math.min(1.5, camPhi));
   camDistance = Math.max(6, Math.min(320, camDistance));
   camera.position.x = lookAtTarget.x + camDistance * Math.sin(camPhi) * Math.sin(camTheta);
@@ -650,6 +683,7 @@ function addRoofDetails(parent, key, baseWidth, capWidth, h, accentColor) {
 // instead of being purely decorative. A thin bright inner core layered
 // inside the soft outer beam gives it the denser, more substantial look
 // from the reference instead of one flat translucent cone.
+const rooftopBeamMeshes = [];
 function addRooftopBeam(parent, capWidth, h, accentColor) {
   const beamHeight = Math.max(24, h * 1.6);
 
@@ -662,6 +696,7 @@ function addRooftopBeam(parent, capWidth, h, accentColor) {
   const beam = new THREE.Mesh(beamGeo, beamMat);
   beam.position.y = h / 2 + beamHeight / 2 + 0.15;
   parent.add(beam);
+  rooftopBeamMeshes.push(beam);
 
   const coreGeo = new THREE.CylinderGeometry(0.05 * capWidth + 0.06, 0.075 * capWidth + 0.09, beamHeight * 0.94, 12, 1, true);
   const coreMat = new THREE.MeshBasicMaterial({
@@ -672,6 +707,7 @@ function addRooftopBeam(parent, capWidth, h, accentColor) {
   const core = new THREE.Mesh(coreGeo, coreMat);
   core.position.y = beam.position.y;
   parent.add(core);
+  rooftopBeamMeshes.push(core);
 
   return beam;
 }
@@ -1536,6 +1572,85 @@ function buildRingRoad(radius) {
   }
 }
 
+// ---- PLAYER PLANE: a retro wooden biplane, visible only in fly mode.
+// Built from primitives to roughly match a classic double-winged biplane
+// silhouette - fuselage, upper + lower wings with X-strut supports, tail
+// fin/stabilizer, a spinning propeller, and simple landing gear. Stays
+// hidden (and out of the raycaster's clickable list) in normal mode. ----
+let playerPlane = null;
+let playerPlanePropeller = null;
+function buildPlayerPlane() {
+  const group = new THREE.Group();
+  const woodMat = new THREE.MeshStandardMaterial({ color: 0xd8b48c, roughness: 0.75, metalness: 0.05 });
+  const darkMat = new THREE.MeshStandardMaterial({ color: 0x3a2c1e, roughness: 0.8 });
+
+  // Fuselage - tapered body with a rounded nose cone
+  const fuselage = new THREE.Mesh(new THREE.CylinderGeometry(0.32, 0.22, 3.4, 10), woodMat);
+  fuselage.rotation.z = Math.PI / 2;
+  group.add(fuselage);
+  const nose = new THREE.Mesh(new THREE.ConeGeometry(0.32, 0.6, 10), woodMat);
+  nose.rotation.z = Math.PI / 2;
+  nose.position.x = 1.9;
+  group.add(nose);
+
+  // Upper + lower wings
+  const upperWing = new THREE.Mesh(new THREE.BoxGeometry(1.0, 0.08, 5.2), woodMat);
+  upperWing.position.set(0.1, 0.85, 0);
+  group.add(upperWing);
+  const lowerWing = new THREE.Mesh(new THREE.BoxGeometry(0.85, 0.08, 4.3), woodMat);
+  lowerWing.position.set(0.05, -0.15, 0);
+  group.add(lowerWing);
+
+  // X-strut supports between the wings, one pair per side
+  [1.7, -1.7].forEach((wz) => {
+    const strutA = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.035, 1.1, 6), darkMat);
+    strutA.position.set(0.1, 0.35, wz);
+    strutA.rotation.x = 0.28 * (wz > 0 ? 1 : -1);
+    group.add(strutA);
+    const strutB = strutA.clone();
+    strutB.rotation.x = -0.28 * (wz > 0 ? 1 : -1);
+    group.add(strutB);
+  });
+
+  // Tail fin + horizontal stabilizer
+  const tailFin = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.65, 0.06), woodMat);
+  tailFin.position.set(-1.75, 0.35, 0);
+  group.add(tailFin);
+  const stabilizer = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.06, 1.6), woodMat);
+  stabilizer.position.set(-1.75, 0.02, 0);
+  group.add(stabilizer);
+
+  // Propeller - two crossed blades on the nose, spun continuously while flying
+  const propGroup = new THREE.Group();
+  propGroup.position.x = 2.25;
+  const bladeGeo = new THREE.BoxGeometry(0.06, 0.9, 0.14);
+  const blade1 = new THREE.Mesh(bladeGeo, darkMat);
+  propGroup.add(blade1);
+  const blade2 = new THREE.Mesh(bladeGeo, darkMat);
+  blade2.rotation.x = Math.PI / 2;
+  propGroup.add(blade2);
+  group.add(propGroup);
+  playerPlanePropeller = propGroup;
+
+  // Simple landing gear
+  const wheelMat = new THREE.MeshStandardMaterial({ color: 0x111114, roughness: 0.8 });
+  [0.5, -0.5].forEach((wz) => {
+    const strut = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.55, 6), darkMat);
+    strut.position.set(0.5, -0.55, wz);
+    group.add(strut);
+    const wheel = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.22, 0.12, 12), wheelMat);
+    wheel.rotation.z = Math.PI / 2;
+    wheel.position.set(0.5, -0.85, wz);
+    group.add(wheel);
+  });
+
+  group.visible = false;
+  group.castShadow = true;
+  scene.add(group);
+  playerPlane = group;
+}
+buildPlayerPlane();
+
 const roadCars = [];
 const carHeadlightAssets = [];
 function addCar(radius, angle, speed, color) {
@@ -1673,6 +1788,22 @@ function buildBalloonEnvelopeTexture(colorA, colorB) {
   return tex;
 }
 
+// Shared flame texture - bright yellow base fading through orange to a
+// transparent red tip. Built once and reused across every balloon.
+const flameTexture = (() => {
+  const c = document.createElement('canvas');
+  c.width = 16; c.height = 64;
+  const ctx = c.getContext('2d');
+  const g = ctx.createLinearGradient(0, 64, 0, 0);
+  g.addColorStop(0, 'rgba(255,240,150,0.95)');
+  g.addColorStop(0.35, 'rgba(255,170,60,0.9)');
+  g.addColorStop(0.7, 'rgba(255,90,40,0.55)');
+  g.addColorStop(1, 'rgba(255,60,30,0)');
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, 16, 64);
+  return new THREE.CanvasTexture(c);
+})();
+
 const balloonEntries = [];
 function addHotAirBalloon(radius, angle, speed, baseY, colorA, colorB) {
   const group = new THREE.Group();
@@ -1718,10 +1849,10 @@ function addHotAirBalloon(radius, angle, speed, baseY, colorA, colorB) {
     group.add(rope);
   });
 
-  // Small warm glow at the basket opening, like a burner flame. Built
-  // directly here (not via addGlowSprite) and added to the balloon's own
-  // group, so it travels with the balloon instead of staying fixed in
-  // world space where addGlowSprite would otherwise plant it.
+  // Actual flickering flame at the basket opening - a small gradient-
+  // textured cone (bright yellow base fading to transparent orange-red tip)
+  // plus the light/glow sprite, all flickered together each frame in the
+  // animate loop rather than sitting static.
   const flame = new THREE.PointLight(0xffaa55, 0.5, 3);
   flame.position.set(0, 0.55, 0);
   group.add(flame);
@@ -1733,10 +1864,22 @@ function addHotAirBalloon(radius, angle, speed, baseY, colorA, colorB) {
   flameGlow.position.set(0, 0.55, 0);
   flameGlow.scale.set(0.9, 0.9, 1);
   group.add(flameGlow);
+  const flameMesh = new THREE.Mesh(
+    new THREE.ConeGeometry(0.16, 0.55, 10, 1, true),
+    new THREE.MeshBasicMaterial({
+      map: flameTexture, transparent: true, depthWrite: false,
+      blending: THREE.AdditiveBlending, side: THREE.DoubleSide,
+    })
+  );
+  flameMesh.position.set(0, 0.62, 0);
+  group.add(flameMesh);
 
   group.position.set(Math.cos(angle) * radius, baseY, Math.sin(angle) * radius);
   scene.add(group);
-  balloonEntries.push({ group, radius, angle, speed, baseY, bobPhase: Math.random() * Math.PI * 2 });
+  balloonEntries.push({
+    group, radius, angle, speed, baseY, bobPhase: Math.random() * Math.PI * 2,
+    flame, flameGlow, flameMesh, flickerSeed: Math.random() * 100,
+  });
 }
 
 {
@@ -1833,9 +1976,9 @@ function sampleTextPoints(text, maxPoints) {
 // so it stays readable even if the camera keeps moving during the hold.
 const fireworkTexts = [];
 function spawnFireworkText(originPos, text, color) {
-  const { points, width } = sampleTextPoints(text, 200);
+  const { points, width } = sampleTextPoints(text, FIREWORK_TEXT_MAX_POINTS);
   if (points.length === 0) return;
-  const desiredWidth = Math.min(11, Math.max(4, text.length * 0.3));
+  const desiredWidth = Math.min(17, Math.max(6, text.length * 0.42));
   const scale = desiredWidth / width;
   const count = points.length;
 
@@ -1845,7 +1988,7 @@ function spawnFireworkText(originPos, text, color) {
     targetLocal[i * 2] = points[i][0] * scale;
     targetLocal[i * 2 + 1] = points[i][1] * scale;
     const ang = Math.random() * Math.PI * 2;
-    const r = 1.2 + Math.random() * 2.2;
+    const r = 2.2 + Math.random() * 3.5;
     startLocal[i * 2] = Math.cos(ang) * r;
     startLocal[i * 2 + 1] = Math.sin(ang) * r;
   }
@@ -1859,7 +2002,7 @@ function spawnFireworkText(originPos, text, color) {
   const geo = new THREE.BufferGeometry();
   geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
   const mat = new THREE.PointsMaterial({
-    color: new THREE.Color(color), size: 0.15, transparent: true, opacity: 0,
+    color: new THREE.Color(color), size: 0.19, transparent: true, opacity: 0,
     depthWrite: false, blending: THREE.AdditiveBlending, sizeAttenuation: true,
   });
   const pts = new THREE.Points(geo, mat);
@@ -1894,7 +2037,7 @@ function spawnFireworkRocket(fromPos, toPos, color, text) {
 }
 
 function spawnFireworkBurst(position, color) {
-  const count = 48;
+  const count = FIREWORK_BURST_COUNT;
   const geo = new THREE.BufferGeometry();
   const positions = new Float32Array(count * 3);
   const velocities = new Float32Array(count * 3);
@@ -1904,19 +2047,19 @@ function spawnFireworkBurst(position, color) {
     positions[i * 3 + 2] = position.z;
     const theta = Math.random() * Math.PI * 2;
     const phi = Math.acos(Math.random() * 2 - 1);
-    const speed = 3.2 + Math.random() * 2.4;
+    const speed = 5.5 + Math.random() * 3.8;
     velocities[i * 3] = Math.sin(phi) * Math.cos(theta) * speed;
     velocities[i * 3 + 1] = Math.cos(phi) * speed * 0.9 + 0.8;
     velocities[i * 3 + 2] = Math.sin(phi) * Math.sin(theta) * speed;
   }
   geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
   const mat = new THREE.PointsMaterial({
-    color: new THREE.Color(color), size: 0.22, transparent: true, opacity: 1,
+    color: new THREE.Color(color), size: 0.24, transparent: true, opacity: 1,
     depthWrite: false, blending: THREE.AdditiveBlending, sizeAttenuation: true,
   });
   const points = new THREE.Points(geo, mat);
   scene.add(points);
-  fireworkBursts.push({ points, velocities, start: performance.now(), duration: 1200 });
+  fireworkBursts.push({ points, velocities, start: performance.now(), duration: 1500 });
 }
 
 function showLabel(b) {
@@ -1928,7 +2071,7 @@ function showLabel(b) {
 }
 
 function celebrateBuilding(b) {
-  const topY = (b.height || 2.5) + 3 + Math.random() * 2;
+  const topY = (b.height || 2.5) * 1.6 + 14 + Math.random() * 6;
   const fromPos = new THREE.Vector3(b.position.x, 0.2, b.position.z);
   const toPos = new THREE.Vector3(b.position.x, topY, b.position.z);
   // Full snippet can run up to ~100 chars, which is illegible as particles
@@ -2060,6 +2203,58 @@ renderer.domElement.addEventListener('wheel', (e) => {
 
 document.getElementById('dayNightBtn').addEventListener('click', () => setDayMode(!isDaytime));
 setDayMode(false);
+
+// Graphics quality - three levels, since this is going out publicly and
+// needs to run acceptably on phones a lot weaker than the one this was
+// built on. Note: antialiasing itself can't be toggled after the renderer
+// is created (it's a WebGL context option, not a runtime setting), so
+// "Low" leaves AA on but cuts pixel ratio, shadows, and particle-heavy
+// effects instead - those are the parts that actually cost the most on a
+// weak GPU.
+let gfxQuality = 'medium';
+function applyGraphicsQuality(level) {
+  gfxQuality = level;
+  const dpr = window.devicePixelRatio || 1;
+
+  if (level === 'low') {
+    renderer.setPixelRatio(1);
+    renderer.shadowMap.enabled = false;
+    sun.castShadow = false;
+    FIREWORK_BURST_COUNT = 22;
+    FIREWORK_TEXT_MAX_POINTS = 70;
+    rooftopBeamMeshes.forEach(m => { m.visible = false; });
+    scanRingEntries.forEach(s => { s.ring.visible = false; s.core.visible = false; });
+  } else if (level === 'medium') {
+    renderer.setPixelRatio(Math.min(dpr, 1.5));
+    renderer.shadowMap.enabled = true;
+    sun.castShadow = true;
+    sun.shadow.mapSize.set(1024, 1024);
+    if (sun.shadow.map) { sun.shadow.map.dispose(); sun.shadow.map = null; }
+    FIREWORK_BURST_COUNT = 36;
+    FIREWORK_TEXT_MAX_POINTS = 140;
+    rooftopBeamMeshes.forEach(m => { m.visible = true; });
+    scanRingEntries.forEach(s => { s.ring.visible = true; s.core.visible = true; });
+  } else {
+    renderer.setPixelRatio(Math.min(dpr, 2));
+    renderer.shadowMap.enabled = true;
+    sun.castShadow = true;
+    sun.shadow.mapSize.set(2048, 2048);
+    if (sun.shadow.map) { sun.shadow.map.dispose(); sun.shadow.map = null; }
+    FIREWORK_BURST_COUNT = 48;
+    FIREWORK_TEXT_MAX_POINTS = 200;
+    rooftopBeamMeshes.forEach(m => { m.visible = true; });
+    scanRingEntries.forEach(s => { s.ring.visible = true; s.core.visible = true; });
+  }
+
+  const btn = document.getElementById('gfxQualityBtn');
+  const label = level === 'low' ? 'Low' : level === 'medium' ? 'Medium' : 'High';
+  btn.innerHTML = '&#127918; Graphics: ' + label;
+}
+document.getElementById('gfxQualityBtn').addEventListener('click', () => {
+  const next = gfxQuality === 'low' ? 'medium' : gfxQuality === 'medium' ? 'high' : 'low';
+  applyGraphicsQuality(next);
+});
+applyGraphicsQuality('medium');
 
 // Switches between the normal orbit/walk camera and a free-flight camera.
 // Entering flight mode starts from wherever the camera currently is (no
@@ -2282,6 +2477,16 @@ function animate() {
     const bob = Math.sin(performance.now() * 0.0006 + be.bobPhase) * 1.6;
     be.group.position.set(Math.cos(be.angle) * be.radius, be.baseY + bob, Math.sin(be.angle) * be.radius);
     be.group.rotation.y += 0.002;
+
+    // Flame flicker - two layered sine waves at different frequencies (not
+    // one clean sine) so it reads as an irregular flicker rather than a
+    // smooth pulse.
+    const flickerNow = performance.now();
+    const flicker = 0.75 + 0.18 * Math.sin(flickerNow * 0.02 + be.flickerSeed)
+                         + 0.12 * Math.sin(flickerNow * 0.055 + be.flickerSeed * 1.7);
+    be.flame.intensity = 1.0 * flicker;
+    be.flameGlow.material.opacity = 0.55 * flicker;
+    be.flameMesh.scale.set(flicker, 0.85 + 0.35 * flicker, flicker);
   }
 
   // Joystick pans the camera rig across the ground - forward/back and
@@ -2391,6 +2596,10 @@ function animate() {
       posAttr.needsUpdate = true;
       ft.points.material.opacity = Math.max(0, opacity);
     }
+  }
+
+  if (playerPlanePropeller && playerPlane && playerPlane.visible) {
+    playerPlanePropeller.rotation.x += 0.9;
   }
 
   if (altUpHeld || altDownHeld) {
