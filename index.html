@@ -2290,6 +2290,20 @@ document.getElementById('flightModeBtn').addEventListener('click', () => setFlig
 const joystickEl = document.getElementById('joystick');
 const joystickKnob = document.getElementById('joystickKnob');
 let joystickVec = { x: 0, y: 0 };
+// Smoothed + curved joystick output, recomputed each frame in animate().
+// Raw joystickVec above is the instant finger position (jumpy on a small
+// 40px touch radius); this eases toward it instead of applying it directly,
+// plus a dead zone near center and a quadratic response curve so small
+// nudges give fine slow control while full deflection still gives full
+// speed - addresses "too sensitive, need smooth full control."
+let joySmooth = { x: 0, y: 0 };
+function curveJoystickAxis(v) {
+  const deadzone = 0.08;
+  const mag = Math.abs(v);
+  if (mag < deadzone) return 0;
+  const norm = (mag - deadzone) / (1 - deadzone);
+  return Math.sign(v) * norm * norm;
+}
 let joystickPointerId = null;
 const JOY_RADIUS = 40;
 
@@ -2499,23 +2513,33 @@ function animate() {
   // flight mode the same stick also moves vertically (climb/dive) based on
   // the current look pitch (camPhi), so looking up and pushing forward
   // makes you climb, like a plane.
-  if (Math.abs(joystickVec.x) > 0.02 || Math.abs(joystickVec.y) > 0.02) {
+  //
+  // Input goes: raw touch position -> eased toward each frame (joySmooth)
+  // -> dead-zoned + quadratic-curved (curveJoystickAxis) -> used for
+  // movement. Without this, a small twitch of the thumb on the ~40px touch
+  // radius translated directly into a big speed change, which read as
+  // "too sensitive." Smoothing + the curve is what actually fixes that.
+  joySmooth.x += (joystickVec.x - joySmooth.x) * 0.15;
+  joySmooth.y += (joystickVec.y - joySmooth.y) * 0.15;
+  const jx = curveJoystickAxis(joySmooth.x);
+  const jy = curveJoystickAxis(joySmooth.y);
+  if (Math.abs(jx) > 0.001 || Math.abs(jy) > 0.001) {
     if (flightMode) {
-      const speed = 0.85;
+      const speed = 0.7;
       const fx = -Math.sin(camPhi) * Math.sin(camTheta);
       const fy = -Math.cos(camPhi);
       const fz = -Math.sin(camPhi) * Math.cos(camTheta);
       const rightX = Math.cos(camTheta), rightZ = -Math.sin(camTheta);
-      flightPos.x += (fx * -joystickVec.y + rightX * joystickVec.x) * speed;
-      flightPos.y += (fy * -joystickVec.y) * speed;
-      flightPos.z += (fz * -joystickVec.y + rightZ * joystickVec.x) * speed;
+      flightPos.x += (fx * -jy + rightX * jx) * speed;
+      flightPos.y += (fy * -jy) * speed;
+      flightPos.z += (fz * -jy + rightZ * jx) * speed;
       flightPos.y = Math.max(2, flightPos.y);
     } else {
-      const moveSpeed = 0.5;
+      const moveSpeed = 0.4;
       const forwardX = -Math.sin(camTheta), forwardZ = -Math.cos(camTheta);
       const rightX = -forwardZ, rightZ = forwardX;
-      const dx = (forwardX * -joystickVec.y + rightX * joystickVec.x) * moveSpeed;
-      const dz = (forwardZ * -joystickVec.y + rightZ * joystickVec.x) * moveSpeed;
+      const dx = (forwardX * -jy + rightX * jx) * moveSpeed;
+      const dz = (forwardZ * -jy + rightZ * jx) * moveSpeed;
       lookAtTarget.x += dx; lookAtTarget.z += dz;
       lookAtGoal.x += dx; lookAtGoal.z += dz;
     }
