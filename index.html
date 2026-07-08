@@ -261,6 +261,8 @@ let lookAtGoal = lookAtTarget.clone();
 // - only what the rotation angles DO (orbit vs. steer) changes.
 let flightMode = false;
 let flightPos = new THREE.Vector3(0, 20, 40);
+let playerPlane = null;
+let playerPlanePropeller = null;
 
 function updateCamera() {
   if (flightMode) {
@@ -1576,9 +1578,11 @@ function buildRingRoad(radius) {
 // Built from primitives to roughly match a classic double-winged biplane
 // silhouette - fuselage, upper + lower wings with X-strut supports, tail
 // fin/stabilizer, a spinning propeller, and simple landing gear. Stays
-// hidden (and out of the raycaster's clickable list) in normal mode. ----
-let playerPlane = null;
-let playerPlanePropeller = null;
+// hidden (and out of the raycaster's clickable list) in normal mode.
+// (playerPlane/playerPlanePropeller are declared earlier, alongside the
+// other flight-state variables, since updateCamera() references them on
+// every call - including the very first one during setup, before this
+// build function has even run.) ----
 function buildPlayerPlane() {
   const group = new THREE.Group();
   const woodMat = new THREE.MeshStandardMaterial({ color: 0xd8b48c, roughness: 0.75, metalness: 0.05 });
