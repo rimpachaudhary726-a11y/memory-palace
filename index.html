@@ -49,6 +49,14 @@
     border:1px solid rgba(255,255,255,0.28);
     background:rgba(6,10,26,0.55);
   }
+  #altUpBtn, #altDownBtn {
+    position:fixed; left:150px; width:52px; height:52px; z-index:20;
+    border-radius:50%; background:rgba(255,255,255,0.12);
+    border:1px solid rgba(255,255,255,0.3); color:#fff; font-size:20px;
+    touch-action:none; user-select:none;
+  }
+  #altUpBtn { bottom:88px; }
+  #altDownBtn { bottom:24px; }
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 </head>
@@ -59,6 +67,8 @@
 <button id="dayNightBtn">&#127769; Night</button>
 <button id="flightModeBtn">&#9992;&#65039; Fly</button>
 <div id="joystick"><div id="joystickKnob"></div></div>
+<button id="altUpBtn">&#9650;</button>
+<button id="altDownBtn">&#9660;</button>
 <canvas id="minimap" width="130" height="130"></canvas>
 <script>
 window.addEventListener('error', function(e) {
@@ -78,6 +88,7 @@ scene.fog = new THREE.FogExp2(0x070c1e, 0.013);
 const camera = new THREE.PerspectiveCamera(60, window.innerWidth/window.innerHeight, 0.1, 2000);
 
 const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
@@ -369,6 +380,14 @@ function setDayMode(day) {
     sun.intensity = 0.6;
   }
   window.__skyMat.map.needsUpdate = true;
+
+  // Car headlights only switch on at night - during the day they'd just
+  // look like odd glowing dots against a bright sky.
+  carHeadlightAssets.forEach(ca => {
+    ca.light.intensity = day ? 0 : 0.9;
+    ca.beamMats.forEach(m => { m.opacity = day ? 0 : 0.6; });
+  });
+
   const btn = document.getElementById('dayNightBtn');
   if (btn) btn.textContent = day ? '☀️ Day' : '🌙 Night';
 }
@@ -1518,6 +1537,7 @@ function buildRingRoad(radius) {
 }
 
 const roadCars = [];
+const carHeadlightAssets = [];
 function addCar(radius, angle, speed, color) {
   const car = new THREE.Group();
   // Glossy clearcoat paint (picks up the sky/environment reflection like
@@ -1591,6 +1611,29 @@ function addCar(radius, angle, speed, color) {
   taillightL.position.z = -0.16;
   car.add(taillightL);
 
+  // Actual headlight light source (not just a bright dot) plus a flaring
+  // beam cone reusing the same gradient texture as the rooftop searchlights
+  // - bright near the car, fading into the distance. Both start OFF; day/
+  // night toggling turns them on only at night (see carHeadlightAssets).
+  const headlightPointLight = new THREE.PointLight(0xfff2c0, 0, 3.5);
+  headlightPointLight.position.set(0.5, 0.22, 0);
+  car.add(headlightPointLight);
+
+  const beamMats = [];
+  [0.16, -0.16].forEach((bz) => {
+    const beamGeo = new THREE.CylinderGeometry(0.22, 0.03, 1.0, 10, 1, true);
+    const beamMat = new THREE.MeshBasicMaterial({
+      map: beamTexture, color: 0xfff2c0, transparent: true, opacity: 0,
+      depthWrite: false, blending: THREE.AdditiveBlending, side: THREE.DoubleSide,
+    });
+    const beam = new THREE.Mesh(beamGeo, beamMat);
+    beam.rotation.z = Math.PI / 2;
+    beam.position.set(0.46 + 0.5, 0.22, bz);
+    car.add(beam);
+    beamMats.push(beamMat);
+  });
+  carHeadlightAssets.push({ light: headlightPointLight, beamMats });
+
   car.scale.set(1.35, 1.35, 1.35);
   scene.add(car);
   roadCars.push({ car, radius, angle, speed });
@@ -1610,14 +1653,19 @@ buildRingRoad(roadRadius);
 // Envelope uses a baked vertical-gore-stripe texture (alternating colors
 // running pole-to-pole) rather than lit materials, so it reads clearly as
 // a classic striped balloon in both day and night mode. ----
+function hexToCss(hexNum) {
+  return '#' + hexNum.toString(16).padStart(6, '0');
+}
+
 function buildBalloonEnvelopeTexture(colorA, colorB) {
   const w = 128, h = 16;
   const canvas = document.createElement('canvas');
   canvas.width = w; canvas.height = h;
   const ctx = canvas.getContext('2d');
   const gores = 10;
+  const cssA = hexToCss(colorA), cssB = hexToCss(colorB);
   for (let i = 0; i < gores; i++) {
-    ctx.fillStyle = i % 2 === 0 ? colorA : colorB;
+    ctx.fillStyle = i % 2 === 0 ? cssA : cssB;
     ctx.fillRect((i / gores) * w, 0, w / gores + 1, h);
   }
   const tex = new THREE.CanvasTexture(canvas);
@@ -1630,12 +1678,31 @@ function addHotAirBalloon(radius, angle, speed, baseY, colorA, colorB) {
   const group = new THREE.Group();
   const envelopeTex = buildBalloonEnvelopeTexture(colorA, colorB);
   const envelope = new THREE.Mesh(
-    new THREE.SphereGeometry(1.3, 20, 16),
+    new THREE.SphereGeometry(1.7, 20, 16),
     new THREE.MeshBasicMaterial({ map: envelopeTex })
   );
   envelope.scale.set(1, 1.25, 1);
-  envelope.position.y = 2.6;
+  envelope.position.y = 3.2;
   group.add(envelope);
+
+  // Soft glow sprite sitting behind the whole envelope - without this the
+  // balloon is only as bright as its unlit texture, which reads as a dark
+  // blob against the night sky from any distance. This makes it visible as
+  // a glowing lantern shape instead.
+  const envelopeGlowMat = new THREE.SpriteMaterial({
+    map: glowTexture, color: new THREE.Color(colorA),
+    transparent: true, opacity: 0.5, depthWrite: false, blending: THREE.AdditiveBlending,
+  });
+  const envelopeGlow = new THREE.Sprite(envelopeGlowMat);
+  envelopeGlow.position.set(0, 3.2, 0);
+  envelopeGlow.scale.set(4.2, 4.6, 1);
+  group.add(envelopeGlow);
+
+  // Gentle light inside the envelope itself (separate from the basket
+  // flame below) so the balloon looks lit from within, like a paper lantern.
+  const innerGlow = new THREE.PointLight(colorA, 0.7, 5);
+  innerGlow.position.set(0, 3.0, 0);
+  group.add(innerGlow);
 
   // Basket + connecting ropes
   const basketMat = new THREE.MeshStandardMaterial({ color: 0x7a4a2a, roughness: 0.85 });
@@ -1644,7 +1711,7 @@ function addHotAirBalloon(radius, angle, speed, baseY, colorA, colorB) {
   group.add(basket);
 
   const ropeMat = new THREE.MeshStandardMaterial({ color: 0x3a3228, roughness: 0.9 });
-  const ropeTop = 0.98, ropeBottom = 0.5;
+  const ropeTop = 1.58, ropeBottom = 0.5;
   [[0.35, 0.35], [0.35, -0.35], [-0.35, 0.35], [-0.35, -0.35]].forEach(([rx, rz]) => {
     const rope = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.02, ropeTop - ropeBottom, 4), ropeMat);
     rope.position.set(rx * 0.45, (ropeTop + ropeBottom) / 2, rz * 0.45);
@@ -1717,12 +1784,160 @@ function setSelected(idx) {
   if (idx !== null) applyHighlight(idx);
 }
 
+// Samples a canvas-rendered string into a set of 2D points (local plane
+// coordinates, centered on origin, y-up) wherever the text is opaque.
+// Used to give firework particles an actual shape to converge into instead
+// of just dispersing randomly.
+function sampleTextPoints(text, maxPoints) {
+  const fontSize = 44;
+  const measureCanvas = document.createElement('canvas');
+  const mctx = measureCanvas.getContext('2d');
+  mctx.font = 'bold ' + fontSize + 'px sans-serif';
+  const textWidthPx = Math.ceil(mctx.measureText(text).width) + 24;
+
+  const canvas = document.createElement('canvas');
+  canvas.width = Math.max(64, textWidthPx);
+  canvas.height = Math.round(fontSize * 1.6);
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#000';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.fillStyle = '#fff';
+  ctx.font = 'bold ' + fontSize + 'px sans-serif';
+  ctx.textBaseline = 'middle';
+  ctx.textAlign = 'left';
+  ctx.fillText(text, 12, canvas.height / 2);
+
+  const img = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+  const pts = [];
+  const step = 3;
+  for (let y = 0; y < canvas.height; y += step) {
+    for (let x = 0; x < canvas.width; x += step) {
+      const idx = (y * canvas.width + x) * 4;
+      if (img[idx] > 128) {
+        pts.push([x - canvas.width / 2, -(y - canvas.height / 2)]);
+      }
+    }
+  }
+  if (pts.length > maxPoints) {
+    const stride = pts.length / maxPoints;
+    const sampled = [];
+    for (let i = 0; i < maxPoints; i++) sampled.push(pts[Math.floor(i * stride)]);
+    return { points: sampled, width: canvas.width };
+  }
+  return { points: pts, width: canvas.width };
+}
+
+// Particles start scattered near the burst point, then converge into the
+// sampled text shape, hold long enough to actually read, then fade. The
+// shape is billboarded every frame using the camera's own right/up vectors
+// so it stays readable even if the camera keeps moving during the hold.
+const fireworkTexts = [];
+function spawnFireworkText(originPos, text, color) {
+  const { points, width } = sampleTextPoints(text, 200);
+  if (points.length === 0) return;
+  const desiredWidth = Math.min(11, Math.max(4, text.length * 0.3));
+  const scale = desiredWidth / width;
+  const count = points.length;
+
+  const startLocal = new Float32Array(count * 2);
+  const targetLocal = new Float32Array(count * 2);
+  for (let i = 0; i < count; i++) {
+    targetLocal[i * 2] = points[i][0] * scale;
+    targetLocal[i * 2 + 1] = points[i][1] * scale;
+    const ang = Math.random() * Math.PI * 2;
+    const r = 1.2 + Math.random() * 2.2;
+    startLocal[i * 2] = Math.cos(ang) * r;
+    startLocal[i * 2 + 1] = Math.sin(ang) * r;
+  }
+
+  const positions = new Float32Array(count * 3);
+  for (let i = 0; i < count; i++) {
+    positions[i * 3] = originPos.x;
+    positions[i * 3 + 1] = originPos.y;
+    positions[i * 3 + 2] = originPos.z;
+  }
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+  const mat = new THREE.PointsMaterial({
+    color: new THREE.Color(color), size: 0.15, transparent: true, opacity: 0,
+    depthWrite: false, blending: THREE.AdditiveBlending, sizeAttenuation: true,
+  });
+  const pts = new THREE.Points(geo, mat);
+  scene.add(pts);
+
+  fireworkTexts.push({
+    points: pts, origin: originPos.clone(), startLocal, targetLocal, count,
+    start: performance.now(), convergeDur: 700, holdDur: 1400, fadeDur: 500,
+  });
+}
+
+// Firework celebration - launched when a building is tapped. A rocket
+// sprite rises from the building's base to just above its roof, then bursts
+// into a colored particle explosion (tinted to the memory's emotion accent)
+// timed with the memory label appearing. True particle-formed text isn't
+// realistic in plain Three.js without a dedicated text-particle library, so
+// this keeps to what's actually reliable: rocket -> burst -> label, all in
+// the same moment, so it reads as "the memory is revealed by the firework."
+const fireworkRockets = [];
+const fireworkBursts = [];
+
+function spawnFireworkRocket(fromPos, toPos, color, text) {
+  const mat = new THREE.SpriteMaterial({
+    map: glowTexture, color: new THREE.Color(color),
+    transparent: true, opacity: 0.95, depthWrite: false, blending: THREE.AdditiveBlending,
+  });
+  const sprite = new THREE.Sprite(mat);
+  sprite.scale.set(0.5, 0.5, 1);
+  sprite.position.copy(fromPos);
+  scene.add(sprite);
+  fireworkRockets.push({ sprite, from: fromPos.clone(), to: toPos.clone(), start: performance.now(), duration: 550, color, text });
+}
+
+function spawnFireworkBurst(position, color) {
+  const count = 48;
+  const geo = new THREE.BufferGeometry();
+  const positions = new Float32Array(count * 3);
+  const velocities = new Float32Array(count * 3);
+  for (let i = 0; i < count; i++) {
+    positions[i * 3] = position.x;
+    positions[i * 3 + 1] = position.y;
+    positions[i * 3 + 2] = position.z;
+    const theta = Math.random() * Math.PI * 2;
+    const phi = Math.acos(Math.random() * 2 - 1);
+    const speed = 3.2 + Math.random() * 2.4;
+    velocities[i * 3] = Math.sin(phi) * Math.cos(theta) * speed;
+    velocities[i * 3 + 1] = Math.cos(phi) * speed * 0.9 + 0.8;
+    velocities[i * 3 + 2] = Math.sin(phi) * Math.sin(theta) * speed;
+  }
+  geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+  const mat = new THREE.PointsMaterial({
+    color: new THREE.Color(color), size: 0.22, transparent: true, opacity: 1,
+    depthWrite: false, blending: THREE.AdditiveBlending, sizeAttenuation: true,
+  });
+  const points = new THREE.Points(geo, mat);
+  scene.add(points);
+  fireworkBursts.push({ points, velocities, start: performance.now(), duration: 1200 });
+}
+
 function showLabel(b) {
   const objs = (b.objects || []).join(', ');
   labelEl.innerHTML = '<b>' + b.emotion.toUpperCase() + '</b>' +
     (objs ? ' &middot; ' + objs : '') +
     (b.snippet ? '<br>' + b.snippet : '');
   labelEl.style.display = 'block';
+}
+
+function celebrateBuilding(b) {
+  const topY = (b.height || 2.5) + 3 + Math.random() * 2;
+  const fromPos = new THREE.Vector3(b.position.x, 0.2, b.position.z);
+  const toPos = new THREE.Vector3(b.position.x, topY, b.position.z);
+  // Full snippet can run up to ~100 chars, which is illegible as particles
+  // at a size that fits on screen - truncated further here specifically
+  // for the particle text. The full snippet still shows in the label as
+  // before; this is just what the firework itself spells out.
+  const raw = b.snippet || (b.emotion ? b.emotion.toUpperCase() : '');
+  const text = raw.length > 30 ? raw.slice(0, 30).trim() + '...' : raw;
+  spawnFireworkRocket(fromPos, toPos, b.accent, text);
 }
 
 function handlePick(clientX, clientY) {
@@ -1736,6 +1951,7 @@ function handlePick(clientX, clientY) {
     showLabel(hits[0].object.userData);
     flyToBuilding(hits[0].object.userData);
     setSelected(hits[0].object.userData.index);
+    celebrateBuilding(hits[0].object.userData);
   } else {
     labelEl.style.display = 'none';
     lookAtGoal.set(0, 3, 0);
@@ -1843,6 +2059,7 @@ renderer.domElement.addEventListener('wheel', (e) => {
 }, { passive: true });
 
 document.getElementById('dayNightBtn').addEventListener('click', () => setDayMode(!isDaytime));
+setDayMode(false);
 
 // Switches between the normal orbit/walk camera and a free-flight camera.
 // Entering flight mode starts from wherever the camera currently is (no
@@ -1917,6 +2134,23 @@ joystickEl.addEventListener('pointerup', (e) => {
   e.stopPropagation();
 });
 joystickEl.addEventListener('pointercancel', resetJoystick);
+
+// Altitude buttons - held-down state applied every frame in animate(), so
+// they work identically whether in fly mode (moves flightPos.y directly)
+// or normal mode (raises/lowers the orbit target, like a crane shot). This
+// exists as a dedicated, unambiguous control because relying only on
+// look-pitch + joystick-throttle to climb wasn't landing reliably.
+let altUpHeld = false, altDownHeld = false;
+const altUpBtn = document.getElementById('altUpBtn');
+const altDownBtn = document.getElementById('altDownBtn');
+altUpBtn.addEventListener('pointerdown', (e) => { altUpHeld = true; e.preventDefault(); });
+altUpBtn.addEventListener('pointerup', () => { altUpHeld = false; });
+altUpBtn.addEventListener('pointercancel', () => { altUpHeld = false; });
+altUpBtn.addEventListener('pointerleave', () => { altUpHeld = false; });
+altDownBtn.addEventListener('pointerdown', (e) => { altDownHeld = true; e.preventDefault(); });
+altDownBtn.addEventListener('pointerup', () => { altDownHeld = false; });
+altDownBtn.addEventListener('pointercancel', () => { altDownHeld = false; });
+altDownBtn.addEventListener('pointerleave', () => { altDownHeld = false; });
 
 // ---- MINIMAP: a small top-down plan view in the corner, Git City style -
 // every building plotted as a dot (clamped to the disc edge if it's
@@ -2075,6 +2309,97 @@ function animate() {
       const dz = (forwardZ * -joystickVec.y + rightZ * joystickVec.x) * moveSpeed;
       lookAtTarget.x += dx; lookAtTarget.z += dz;
       lookAtGoal.x += dx; lookAtGoal.z += dz;
+    }
+  }
+
+  // Fireworks: rockets rise then hand off to a particle burst; bursts
+  // integrate simple gravity each frame and fade out before being disposed.
+  const fwNow = performance.now();
+  for (let i = fireworkRockets.length - 1; i >= 0; i--) {
+    const r = fireworkRockets[i];
+    const t = Math.min(1, (fwNow - r.start) / r.duration);
+    r.sprite.position.lerpVectors(r.from, r.to, t);
+    r.sprite.material.opacity = 0.95 * (1 - t * 0.3);
+    if (t >= 1) {
+      scene.remove(r.sprite);
+      r.sprite.material.dispose();
+      spawnFireworkBurst(r.to, r.color);
+      if (r.text) spawnFireworkText(r.to, r.text, r.color);
+      fireworkRockets.splice(i, 1);
+    }
+  }
+  for (let i = fireworkBursts.length - 1; i >= 0; i--) {
+    const b = fireworkBursts[i];
+    const t = (fwNow - b.start) / b.duration;
+    if (t >= 1) {
+      scene.remove(b.points);
+      b.points.geometry.dispose();
+      b.points.material.dispose();
+      fireworkBursts.splice(i, 1);
+      continue;
+    }
+    const posAttr = b.points.geometry.attributes.position;
+    const dtSec = 0.016;
+    for (let j = 0; j < posAttr.count; j++) {
+      b.velocities[j * 3 + 1] -= 5 * dtSec;
+      posAttr.array[j * 3] += b.velocities[j * 3] * dtSec;
+      posAttr.array[j * 3 + 1] += b.velocities[j * 3 + 1] * dtSec;
+      posAttr.array[j * 3 + 2] += b.velocities[j * 3 + 2] * dtSec;
+    }
+    posAttr.needsUpdate = true;
+    b.points.material.opacity = 1 - t;
+  }
+
+  // Text particles converge into the memory snippet shape, held long
+  // enough to read, then fade. Billboarded every frame using the camera's
+  // own right/up basis vectors so the text stays facing you even if you
+  // keep orbiting or flying during the hold.
+  if (fireworkTexts.length > 0) {
+    const camRight = new THREE.Vector3().setFromMatrixColumn(camera.matrixWorld, 0);
+    const camUp = new THREE.Vector3().setFromMatrixColumn(camera.matrixWorld, 1);
+    for (let i = fireworkTexts.length - 1; i >= 0; i--) {
+      const ft = fireworkTexts[i];
+      const elapsed = fwNow - ft.start;
+      const total = ft.convergeDur + ft.holdDur + ft.fadeDur;
+      if (elapsed > total) {
+        scene.remove(ft.points);
+        ft.points.geometry.dispose();
+        ft.points.material.dispose();
+        fireworkTexts.splice(i, 1);
+        continue;
+      }
+      let progress, opacity;
+      if (elapsed < ft.convergeDur) {
+        progress = elapsed / ft.convergeDur;
+        opacity = progress;
+      } else if (elapsed < ft.convergeDur + ft.holdDur) {
+        progress = 1;
+        opacity = 1;
+      } else {
+        progress = 1;
+        opacity = 1 - (elapsed - ft.convergeDur - ft.holdDur) / ft.fadeDur;
+      }
+      const ease = progress * progress * (3 - 2 * progress);
+      const posAttr = ft.points.geometry.attributes.position;
+      for (let j = 0; j < ft.count; j++) {
+        const lx = ft.startLocal[j * 2] + (ft.targetLocal[j * 2] - ft.startLocal[j * 2]) * ease;
+        const ly = ft.startLocal[j * 2 + 1] + (ft.targetLocal[j * 2 + 1] - ft.startLocal[j * 2 + 1]) * ease;
+        posAttr.array[j * 3] = ft.origin.x + camRight.x * lx + camUp.x * ly;
+        posAttr.array[j * 3 + 1] = ft.origin.y + camRight.y * lx + camUp.y * ly;
+        posAttr.array[j * 3 + 2] = ft.origin.z + camRight.z * lx + camUp.z * ly;
+      }
+      posAttr.needsUpdate = true;
+      ft.points.material.opacity = Math.max(0, opacity);
+    }
+  }
+
+  if (altUpHeld || altDownHeld) {
+    const altSpeed = 0.5 * (altUpHeld ? 1 : -1);
+    if (flightMode) {
+      flightPos.y = Math.max(2, flightPos.y + altSpeed);
+    } else {
+      lookAtTarget.y = Math.max(1, lookAtTarget.y + altSpeed);
+      lookAtGoal.y = Math.max(1, lookAtGoal.y + altSpeed);
     }
   }
 
