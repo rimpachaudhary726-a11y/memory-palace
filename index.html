@@ -106,6 +106,75 @@ document.body.appendChild(renderer.domElement);
 let FIREWORK_BURST_COUNT = 48;
 let FIREWORK_TEXT_MAX_POINTS = 140;
 
+// ------------------------------------------------------------
+// AUDIO: synthesized firework sounds (no external audio files needed).
+// AudioContext is created lazily on the user's first tap/click, since
+// mobile browsers block audio until a real user gesture happens.
+// ------------------------------------------------------------
+let audioCtx = null;
+function ensureAudio() {
+  try {
+    if (!audioCtx) {
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    } else if (audioCtx.state === 'suspended') {
+      audioCtx.resume();
+    }
+  } catch (e) { /* audio not available - fail silently */ }
+}
+
+function playLaunchWhoosh() {
+  if (!audioCtx) return;
+  const now = audioCtx.currentTime;
+  const osc = audioCtx.createOscillator();
+  osc.type = 'sawtooth';
+  osc.frequency.setValueAtTime(220, now);
+  osc.frequency.exponentialRampToValueAtTime(650, now + 0.5);
+  const gain = audioCtx.createGain();
+  gain.gain.setValueAtTime(0.0001, now);
+  gain.gain.linearRampToValueAtTime(0.12, now + 0.08);
+  gain.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
+  osc.connect(gain).connect(audioCtx.destination);
+  osc.start(now);
+  osc.stop(now + 0.55);
+}
+
+function playBoomSound() {
+  if (!audioCtx) return;
+  const now = audioCtx.currentTime;
+
+  // Crackling noise burst - the "sparkle" of the explosion.
+  const bufferSize = Math.floor(audioCtx.sampleRate * 0.6);
+  const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+  const data = buffer.getChannelData(0);
+  for (let i = 0; i < bufferSize; i++) {
+    data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / bufferSize, 1.8);
+  }
+  const noise = audioCtx.createBufferSource();
+  noise.buffer = buffer;
+  const noiseFilter = audioCtx.createBiquadFilter();
+  noiseFilter.type = 'lowpass';
+  noiseFilter.frequency.setValueAtTime(2400, now);
+  noiseFilter.frequency.exponentialRampToValueAtTime(180, now + 0.55);
+  const noiseGain = audioCtx.createGain();
+  noiseGain.gain.setValueAtTime(0.55, now);
+  noiseGain.gain.exponentialRampToValueAtTime(0.001, now + 0.6);
+  noise.connect(noiseFilter).connect(noiseGain).connect(audioCtx.destination);
+  noise.start(now);
+  noise.stop(now + 0.6);
+
+  // Deep low thump - the felt "boom".
+  const osc = audioCtx.createOscillator();
+  osc.type = 'sine';
+  osc.frequency.setValueAtTime(130, now);
+  osc.frequency.exponentialRampToValueAtTime(32, now + 0.4);
+  const oscGain = audioCtx.createGain();
+  oscGain.gain.setValueAtTime(0.8, now);
+  oscGain.gain.exponentialRampToValueAtTime(0.001, now + 0.45);
+  osc.connect(oscGain).connect(audioCtx.destination);
+  osc.start(now);
+  osc.stop(now + 0.5);
+}
+
 // Night sky dome - a richer gradient with a visible glowing moon, painted
 // onto one equirectangular canvas (also reused as scene.environment so
 // windows/metal trim have something real to reflect instead of flat black).
@@ -261,6 +330,11 @@ let lookAtGoal = lookAtTarget.clone();
 // - only what the rotation angles DO (orbit vs. steer) changes.
 let flightMode = false;
 let flightPos = new THREE.Vector3(0, 20, 40);
+// Smoothed chase-camera position - the actual camera eases toward the
+// ideal chase point every frame instead of snapping to it directly, which
+// is what made the plane's camera feel jerky/uncontrollable before.
+let flightCamPos = new THREE.Vector3(0, 20, 40);
+let flightCamInit = false;
 let playerPlane = null;
 let playerPlanePropeller = null;
 
@@ -283,19 +357,28 @@ function updateCamera() {
 
     // Chase camera: trails behind and slightly above the plane instead of
     // being the plane's own eyepoint - so you can actually see the plane
-    // you're flying, not just an empty first-person view.
+    // you're flying, not just an empty first-person view. The ideal chase
+    // point is computed each frame, then the actual camera eases toward it
+    // (rather than snapping) for smooth, controllable movement.
     const chaseDist = 8, chaseHeight = 2.6;
-    camera.position.set(
-      flightPos.x - fx * chaseDist,
-      flightPos.y - fy * chaseDist + chaseHeight,
-      flightPos.z - fz * chaseDist
-    );
+    const idealX = flightPos.x - fx * chaseDist;
+    const idealY = flightPos.y - fy * chaseDist + chaseHeight;
+    const idealZ = flightPos.z - fz * chaseDist;
+    if (!flightCamInit) {
+      flightCamPos.set(idealX, idealY, idealZ);
+      flightCamInit = true;
+    } else {
+      flightCamPos.x += (idealX - flightCamPos.x) * 0.12;
+      flightCamPos.y += (idealY - flightCamPos.y) * 0.12;
+      flightCamPos.z += (idealZ - flightCamPos.z) * 0.12;
+    }
+    camera.position.copy(flightCamPos);
     camera.lookAt(flightPos.x + fx * 4, flightPos.y + fy * 4, flightPos.z + fz * 4);
     return;
   }
   if (playerPlane) playerPlane.visible = false;
-  camPhi = Math.max(0.15, Math.min(1.5, camPhi));
-  camDistance = Math.max(6, Math.min(320, camDistance));
+  camPhi = Math.max(0.05, Math.min(3.05, camPhi));
+  camDistance = Math.max(4, Math.min(320, camDistance));
   camera.position.x = lookAtTarget.x + camDistance * Math.sin(camPhi) * Math.sin(camTheta);
   camera.position.y = lookAtTarget.y + camDistance * Math.cos(camPhi);
   camera.position.z = lookAtTarget.z + camDistance * Math.sin(camPhi) * Math.cos(camTheta);
@@ -2037,6 +2120,7 @@ function spawnFireworkRocket(fromPos, toPos, color, text) {
   sprite.scale.set(0.5, 0.5, 1);
   sprite.position.copy(fromPos);
   scene.add(sprite);
+  playLaunchWhoosh();
   fireworkRockets.push({ sprite, from: fromPos.clone(), to: toPos.clone(), start: performance.now(), duration: 550, color, text });
 }
 
@@ -2064,6 +2148,7 @@ function spawnFireworkBurst(position, color) {
   const points = new THREE.Points(geo, mat);
   scene.add(points);
   fireworkBursts.push({ points, velocities, start: performance.now(), duration: 1500 });
+  playBoomSound();
 }
 
 function showLabel(b) {
@@ -2133,6 +2218,7 @@ function pointerDistance() {
 renderer.domElement.style.touchAction = 'none';
 
 renderer.domElement.addEventListener('pointerdown', (e) => {
+  ensureAudio();
   activePointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
   if (activePointers.size === 1) {
     isDragging = true;
@@ -2169,7 +2255,7 @@ renderer.domElement.addEventListener('pointermove', (e) => {
   if (Math.abs(dx) > 3 || Math.abs(dy) > 3) dragMoved = true;
   camThetaGoal -= dx * 0.012;
   camPhiGoal -= dy * 0.012;
-  camPhiGoal = flightMode ? Math.max(0.1, Math.min(3.05, camPhiGoal)) : Math.max(0.15, Math.min(1.5, camPhiGoal));
+  camPhiGoal = flightMode ? Math.max(0.1, Math.min(3.05, camPhiGoal)) : Math.max(0.05, Math.min(3.05, camPhiGoal));
   lastX = e.clientX;
   lastY = e.clientY;
 });
@@ -2224,8 +2310,8 @@ function applyGraphicsQuality(level) {
     renderer.setPixelRatio(1);
     renderer.shadowMap.enabled = false;
     sun.castShadow = false;
-    FIREWORK_BURST_COUNT = 22;
-    FIREWORK_TEXT_MAX_POINTS = 70;
+    FIREWORK_BURST_COUNT = 55;
+    FIREWORK_TEXT_MAX_POINTS = 110;
     rooftopBeamMeshes.forEach(m => { m.visible = false; });
     scanRingEntries.forEach(s => { s.ring.visible = false; s.core.visible = false; });
   } else if (level === 'medium') {
@@ -2234,8 +2320,8 @@ function applyGraphicsQuality(level) {
     sun.castShadow = true;
     sun.shadow.mapSize.set(1024, 1024);
     if (sun.shadow.map) { sun.shadow.map.dispose(); sun.shadow.map = null; }
-    FIREWORK_BURST_COUNT = 36;
-    FIREWORK_TEXT_MAX_POINTS = 140;
+    FIREWORK_BURST_COUNT = 90;
+    FIREWORK_TEXT_MAX_POINTS = 200;
     rooftopBeamMeshes.forEach(m => { m.visible = true; });
     scanRingEntries.forEach(s => { s.ring.visible = true; s.core.visible = true; });
   } else {
@@ -2244,8 +2330,8 @@ function applyGraphicsQuality(level) {
     sun.castShadow = true;
     sun.shadow.mapSize.set(2048, 2048);
     if (sun.shadow.map) { sun.shadow.map.dispose(); sun.shadow.map = null; }
-    FIREWORK_BURST_COUNT = 48;
-    FIREWORK_TEXT_MAX_POINTS = 200;
+    FIREWORK_BURST_COUNT = 140;
+    FIREWORK_TEXT_MAX_POINTS = 280;
     rooftopBeamMeshes.forEach(m => { m.visible = true; });
     scanRingEntries.forEach(s => { s.ring.visible = true; s.core.visible = true; });
   }
@@ -2270,6 +2356,7 @@ function setFlightMode(on) {
   const btn = document.getElementById('flightModeBtn');
   if (on) {
     flightPos.copy(camera.position);
+    flightCamInit = false;
     btn.innerHTML = '&#128694; Normal';
   } else {
     lookAtTarget.set(flightPos.x, Math.max(2, flightPos.y * 0.3), flightPos.z);
